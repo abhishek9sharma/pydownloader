@@ -8,8 +8,8 @@ from resourcedownloader.downloadservice.http_downloader import  HTTPDownloader
 class DownloadProtocolFactory:
 
     @staticmethod
-    def get_protocol(uri):
-        parsed_url = urlparse(uri)
+    def get_protocol(url):
+        parsed_url = urlparse(url)
         protocol = parsed_url.scheme
         if protocol =='http':
             return HTTPDownloader

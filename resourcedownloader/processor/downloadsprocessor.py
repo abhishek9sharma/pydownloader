@@ -1,17 +1,17 @@
 # import  sys
 # print(sys.path)
 from  resourcedownloader.downloadservice.download_factory import DownloadProtocolFactory
+
 class DownloadsProcessor(object):
 
-    def __init__(self, resourceurislist, path_download_dir):
-        self._resourceuris = resourceurislist
+    def __init__(self, resourceurlslist, path_download_dir):
+        self._resourceurls = resourceurlslist
         self._path_download_dir = path_download_dir
 
     def process_resources(self):
-        for uri in self._resourceuris:
-            determinehandler = DownloadProtocolFactory.get_protocol(uri)
-            print(determinehandler)
-            
-
+        for url in self._resourceurls:
+            downloadertype= DownloadProtocolFactory.get_protocol(url)
+            downloader = downloadertype(url, self._path_download_dir)
+            downloader.download_resource()
 
 
