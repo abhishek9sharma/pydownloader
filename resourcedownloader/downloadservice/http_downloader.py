@@ -10,6 +10,7 @@ class HTTPDownloader(BaseDownloader):
         self._chunksize = 1024
 
     def connect(self):
+        # Check Doawnloadable
         try:
             self._response = requests.get(self._resourceurl, stream=True)
             self._response.raise_for_status()
@@ -27,8 +28,6 @@ class HTTPDownloader(BaseDownloader):
             self.disconnect()
         except:
             pass
-
-
 
     def download_resource(self):
         try:
