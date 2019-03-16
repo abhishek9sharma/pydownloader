@@ -5,7 +5,7 @@ from resourcedownloader.downloadservice.http_downloader import  HTTPDownloader
 
 #TODO : Make Configurable
 
-class DownloadProtocolFactory:
+class DownloadProtocolFactory(object):
 
     @staticmethod
     def get_protocol(url):

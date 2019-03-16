@@ -2,6 +2,7 @@ from abc import abstractmethod, ABC
 import  os
 from  urllib.parse import urlparse
 
+
 class BaseDownloader(ABC):
 
     def __init__(self, resourceurl, path_download_dir):
@@ -12,10 +13,17 @@ class BaseDownloader(ABC):
         self._path_downloaded_file = None
         self._size_of_file_to_download = None
         self._size_of_file_downloaded = 0
+        self._status = None
+        self._chunksize = 1024
+        self._chunkunit = 'b'
+        self.downloadprogress = None
 
     # Check Late if path and file name can be specified while calling fucnction
     # def download_resource(self, download_path_dir = None, download_file_name = None):
     #     pass
+
+    def get_status(self):
+        return  self._status
 
     def set_org_file_name(self):
         try:
@@ -23,11 +31,18 @@ class BaseDownloader(ABC):
         except:
             return  None
 
+    def get_download_path(self):
+        return self._path_downloaded_file
+
     #may be make prooperty
     def set_download_file_path(self):
         try:
-            netloc = self._parsed_url.netloc.replace('.','_')# may be move to utils
-            self._path_downloaded_file = os.path.join(self._path_download_dir, netloc+ '_'+ self._org_file_name)
+            # may be move to utils 
+            #change for all alphanumeric
+            # what if file already exists 
+            netloc = self._parsed_url.netloc.replace('.','_').replace(':','')
+            self._downloaded_file_name = netloc+ '_'+ self._org_file_name
+            self._path_downloaded_file = os.path.join(self._path_download_dir, self._downloaded_file_name )
         except:
             self._path_downloaded_file = None
 
@@ -46,8 +61,10 @@ class BaseDownloader(ABC):
                 os.remove(self._path_downloaded_file)
 
 
-    def get_progress(self):
-        pass
+    
+    def get_download_progress(self):
+        description = self._downloaded_file_name# + ' is being downloaded at' + self._path_download_dir + self._downloaded_file_name
+        return description, self._size_of_file_downloaded, self._size_of_file_to_download
 
 
 
