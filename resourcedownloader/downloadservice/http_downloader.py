@@ -12,7 +12,9 @@ class HTTPDownloader(BaseDownloader):
     def connect(self):
         # Check Doawnloadable
         try:
-            self._response = requests.get(self._resourceurl, stream=True)
+            #header = requests.head(self._resourceurl, allow_redirects = True)
+            #content_length = header.get('content_length', None)
+            self._response = requests.get(self._resourceurl, stream=True, allow_redirects = True)
             self._response.raise_for_status()
             self._size_of_file_to_download= self._response.headers['content_length']
         except :
@@ -41,7 +43,7 @@ class HTTPDownloader(BaseDownloader):
                         f.write(current_chunk)
             self.disconnect()
         except Exception as e:
-            print(e, " abort download ")
+            print(e, " aborting download for {0} due to some exception while downloading", self._resourceurl)
             self.abortdownload()
 
 

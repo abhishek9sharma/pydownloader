@@ -9,9 +9,14 @@ class DownloadProtocolFactory:
 
     @staticmethod
     def get_protocol(url):
+        """
+        Method which identifies the protocol associated with the url.
+        Returns the class whose object should be initiated to download the url.
+        Raises error if the protoco is not yet supported
+        """
         parsed_url = urlparse(url)
         protocol = parsed_url.scheme
-        if protocol =='http':
+        if protocol =='http' or protocol =='https':
             return HTTPDownloader
         elif protocol =='ftp':
             return FTPDownloader

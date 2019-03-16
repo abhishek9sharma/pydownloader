@@ -45,7 +45,8 @@ class BaseDownloader(ABC):
                 print( " Deleteting file {0} downladed with respect to URL {0}", self._path_downloaded_file, self._resourceurl )
                 os.remove(self._path_downloaded_file)
 
-    def get_state(self):
+
+    def get_progress(self):
         pass
 
 
