@@ -14,10 +14,18 @@ class DownloadsProcessor(object):
     def __init__(self, resourceurlslist, path_download_dir):
         self._resourceurls = resourceurlslist
         self._path_download_dir = os.path.join(path_download_dir)
+        
+        if len(self._resourceurls)==0:
+            print( " No urls specified. Please provide resource links need to be downloade")
+            return
+
+        if self._path_download_dir=='' or self._path_download_dir is None:
+            print( " Download directory is not specified or is invalid. Please check ")
+            return
 
         self.jobqueue = Queue()
         self.resultqueue = Queue()
-        self.results = {'Failed' : [] ,'Completed': []}
+        self.results = {'Failed' : [] ,'Completed': [], 'Unresolved':[] }
         self.resources = {}
 
         self.runnningdownloads = []
@@ -30,14 +38,33 @@ class DownloadsProcessor(object):
                 self.jobqueue.put(idx)
                 resourceobj.set_status(statusvalue)    
             else:
-                statusvalue = "Failed : Undefined Protocol"
+                statusvalue = "Unresolved : Undefined Protocol"
                 self.resultqueue.put((idx, statusvalue))
-                self.results['Failed'].append(idx)
-
-                resourceobj.set_status(statusvalue)           
+                self.results['Unresolved'].append(idx)
+                resourceobj.set_status(statusvalue)
+                           
             self.resources[idx] = resourceobj      
          
         self._threadsize = 6
+
+    def delete_failed_downloads(self):
+        for resourceidx in self.results['Failed']:
+            resourceobj = self.resources[resourceidx]
+            if 'Failed' in resourceobj.get_status():
+                if resourceobj.downloadfilepath:
+                    self.delete_failed_download(resourceobj)
+        #decide how to delete resource/downloader/forcefully from here
+
+    def delete_failed_download(self, resourceobj):
+        if resourceobj.protocl_downloader:
+            currdownloader = resourceobj.protocol_downloader
+            if currdownloader:
+                currdownloader.abort_download()
+        try:
+            if  os.path.exists(resourceobj.downloadfilepath):
+                os.remove(resourceobj.downloadfilepath) 
+        except:
+            print (' Error occured while removiing file {0}', resourceobj.downloadfilepath)
 
 
     def monitor_progress(self):
@@ -45,7 +72,6 @@ class DownloadsProcessor(object):
         try:
             while True:
                 if self.jobqueue.unfinished_tasks == 0:
-                    # Add Code to remove dirty files
                     break
 
                 #Track Main Processor
@@ -58,15 +84,20 @@ class DownloadsProcessor(object):
                 # self.mainprocessprogress.update(progress)
 
                 for k,resourceobj in self.resources.items():
-                      resourceobj.plot_progress()
-
+                    resourceobj.plot_progress()
+                    #check if failed downloads can be deleted from here
 
                 time.sleep(1)
-            #Check if some failed filed need removal
-            print(" Completed Downloading Resources")
+            #print(" Completed Downloading Resources")
         except:
-            pass
-            # Add Code to remove dirty files
+            print('Some execption occured in monitor process')
+        finally:
+            print('Deleting all failed downloads')
+            self.delete_failed_downloads()
+            #Consoolidation: Remove files for failed downloade if still present
+
+
+
 
     def process_resources(self):
         try:

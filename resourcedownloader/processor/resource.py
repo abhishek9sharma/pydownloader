@@ -18,6 +18,9 @@ class Resource(object):
    
     def set_status(self, statusvalue):
         self.status = statusvalue
+    
+    def get_status(self, statusvalue):
+        return self.status
 
     def set_downloadfilepath(self, path):
         self.downloadfilepath =  path

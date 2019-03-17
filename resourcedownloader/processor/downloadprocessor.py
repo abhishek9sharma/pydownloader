@@ -45,8 +45,10 @@ class DownloadProcessor(Thread):
                 else:
                     self.resources[resourceidx].set_status(statusval)
                     self.resultqueue.put((resourceidx, statusval))
-                    self.results['Completed'].append(resourceidx)
-
+                    self.results['Failed'].append(resourceidx)
+                    #currdownloader = self.resources[resourceidx].protocol_downloader
+                    #if currdownloader:
+                    #    currdownloader.abortdownload()
                 self.jobqueue.task_done()
             finally:
                 if resourceidx not in self.resources:
