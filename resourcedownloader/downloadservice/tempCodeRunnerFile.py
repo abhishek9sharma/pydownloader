@@ -1,14 +1,6 @@
 from resourcedownloader.downloadservice.resource_downloader import BaseDownloader
 import pysftp
 import  os
-
-
-#TOD:
-    # Check for size compute failure in connect method line 20
-    #port configurable
-
-
-
 class SFTPDownloader(BaseDownloader):
     
     def __init__(self, resourceurl, path_download_dir):
@@ -21,65 +13,67 @@ class SFTPDownloader(BaseDownloader):
 
 
     def connect(self):
+
         try:
-            # Establish Connection
+
             host = self.parsed_url.hostname
             port = self.parsed_url.port
             if port is None:
                 port = 22
             username = self.parsed_url.username
             password = self.parsed_url.password
+
+
             self.sftpconnector = self.pysftpref.Connection(host, username = username, password = password, port = port)
+            if self.sftpconnector is None:
+                raise Exception( "Failed to create connection for url {0}", self.resourceurl)
+
             self.remotepath = self.org_file_name
             if self.remotedir:
                 self.sftpconnector.cwd(self.remotedir)
                 self.remotepath = os.path.join(self.remotedir , self.remotepath)
 
-            # Compute size of file
+
             if not(self.remotepath):
                 self.remotepath = self.org_file_name
 
-            # raise exception if file size cannot be determined
             self.size_of_file_to_download = self.sftpconnector.stat(self.remotepath).st_size
             if self.size_of_file_to_download == 0:
                 #Not sure if this is actually required except for tracking progress
                 raise Exception( " Not Able to determine length of the content to be downloaded for url {0}", self.resourceurl)
 
-        except:
-            raise
+        except Exception as e:
+                print(e, " aborting download for {0} due to exception while making sftp connection", self.resourceurl)
+                self.abortdownload()
+                # Add code for handling the case where header does not case content length or any other exception that may occur while setting up
+                # connection
 
     def disconnect(self):
         try:
             self.sftpconnector.close()
         except:
-            raise
+            print("Exception while closing the SFTP connection for URL {0}", self.resourceurl)
 
     def abortdownload(self):
         try:
             self.disconnect()
-        except:
-            raise
-        finally:
             self.delete_file()
+        except:
+            pass
+
+    def update_progress(self, bytestransferred, bytesleft):
+        self.size_of_file_downloaded = bytestransferred
 
     def download_resource(self, resourceidx):
         try:
             super().download_resource(resourceidx)
+            #self.set_download_file_path()
             self.connect()
-
-            def update_progress(bytestransferred, bytesleft):
-                self.size_of_file_downloaded = bytestransferred
-
-            self.sftpconnector.get(self.remotepath, self.path_downloaded_file, update_progress)
-
-            try:
-                self.disconnect()
-            except:
-                if self.size_of_file_to_download==self.size_of_file_downloaded:
-                    pass
-                else:
-                    raise
-        except:
+            #with open(self.path_downloaded_file, 'wb') as f:
+            self.sftpconnector.get(self.remotepath, self.path_downloaded_file, self.update_progress)
+            self.disconnect()
+        except Exception as e:
+            print(e, " aborting download for {0} due to some exception while downloading", self.resourceurl)
             self.abortdownload()
 
     

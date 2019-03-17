@@ -9,7 +9,17 @@ import  time
 from tqdm import  tqdm
 
 
-class DownloadsProcessor(object):
+#to do
+    # comsoidation based on Q or List?
+    # deletes from downloader or forced from her
+    # errors for 0 inputs
+    # No of threads configurable
+    # Network error such as wifi Temp Dir and Cleanup a possible way
+    # Main Process tqdm bar
+    # Write a Log Somewhere
+
+
+class DownloadsProcessor:
 
     def __init__(self, resourceurlslist, path_download_dir):
         self.resourceurls = resourceurlslist
@@ -48,6 +58,7 @@ class DownloadsProcessor(object):
         self.threadsize = 6
 
     def delete_failed_downloads(self):
+        #check if fetch from Queue thr resource idx
         for resourceidx in self.results['Failed']:
             resourceobj = self.resources[resourceidx]
             if 'Failed' in resourceobj.get_status():
@@ -89,34 +100,34 @@ class DownloadsProcessor(object):
 
                 time.sleep(1)
             self.delete_failed_downloads()
-            #print(" Completed Downloading Resources")
         except:
-            #print('Some execption occured in monitor process')
             self.delete_failed_downloads()
 
-            #Consoolidation: Remove files for failed downloade if still present
 
 
 
 
     def process_resources(self):
         try:
+            #Start Monitor
             progress_monitor = Thread(target=self.monitor_progress)
             progress_monitor.start()
 
-            
-            for threadidx in range(self.threadsize):
+            # Start Downloads
+            if self.threadsize>len(self.resourceurls):
+                noofthreads = len(self.resourceurls)
+            else:
+                noofthreads = self.threadsize
+            for threadidx in range(noofthreads):
                 jobprocessor = DownloadProcessor(self.jobqueue, self.resultqueue, self.resources, self.path_download_dir,self.runnningdownloads, self.results)
-                #jobprocessor = Thread(target= self.worker)
                 jobprocessor.start()
 
             self.jobqueue.join()
-
-            #while len(self.runnningdownloads)>0:
-            #    pass
             progress_monitor.join()
         except:
             pass
-            # Add Code to remove dirty files
+        finally:
+            self.delete_failed_downloads()
+            print(" Completed current iteration for Downloading Resources")
 
 

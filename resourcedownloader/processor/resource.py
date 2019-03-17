@@ -2,7 +2,7 @@ from  resourcedownloader.downloadservice.download_factory import DownloadProtoco
 from tqdm import  tqdm
 import os
 
-class Resource(object):
+class Resource:
 
     def __init__(self, idx, resourceurl):
         """construtor for url that needs to be downloaded"""
@@ -15,7 +15,7 @@ class Resource(object):
         self.download_progress = None
         self.downloadfilepath = None
         self.progress_bar = None
-        self.exceptionlist = []
+        self.exceptions_if_failed = []
    
     def set_status(self, statusvalue):
         self.status = statusvalue

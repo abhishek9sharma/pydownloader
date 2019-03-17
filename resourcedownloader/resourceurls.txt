@@ -1,0 +1,7 @@
+        ftp://speedtest:speedtest@ftp.otenet.gr/test1Mb.db
+        ftp://speedtest:speedtest@ftp.otenet.gr/test10Mb.db
+        http://speedtest.ftp.otenet.gr/files/test1Mb.db
+        http://speedtest.ftp.otenet.gr/files/test100k.db
+        http://speedtest.ftp.otenet.gr/files/test10Mb.db
+        sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/manual_en.pdf
+        sftp://demo:password@test.rebex.net:22/readme.txt
