@@ -37,7 +37,7 @@ class DownloadsProcessor(object):
                 resourceobj.set_status(statusvalue)           
             self.resources[idx] = resourceobj      
          
-        self._threadsize = 2
+        self._threadsize = 6
 
 
     def monitor_progress(self):

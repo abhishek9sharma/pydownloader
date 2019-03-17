@@ -9,6 +9,7 @@ class BaseDownloader(ABC):
         self._resourceurl = resourceurl
         self._path_download_dir = path_download_dir
         self._parsed_url = urlparse(self._resourceurl)
+        self._protocol = self._parsed_url.scheme
         self._org_file_name = self.set_org_file_name()
         self._remotedir = os.path.dirname(self._parsed_url.path)
         self._path_downloaded_file = None
@@ -47,7 +48,7 @@ class BaseDownloader(ABC):
             for char in hostnamechars:
                 netloc = netloc.replace(char,'_')
 
-            self._downloaded_file_name = netloc+ '_'+ self._org_file_name
+            self._downloaded_file_name = self._protocol + '_' + netloc+ '_'+ self._org_file_name
             self._path_downloaded_file = os.path.join(self._path_download_dir, self._downloaded_file_name)
             if self._path_downloaded_file is None:
                 raise Exception('Cannot set download file path for resource {0}', self._resourceurl)

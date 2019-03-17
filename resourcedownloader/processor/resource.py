@@ -26,13 +26,15 @@ class Resource(object):
         if self.protocolresolved and self.protocol_downloader:
             description, downloaded, totalsize, curr_percentage_progress = self.protocol_downloader.get_download_progress()
             if totalsize==0:
-                print('Cannot track progress of {0} as total size determined is {1} ', description, totalsize)
+                description += 'Cannot track progress as size of file not determined'
+                #print('Cannot track progress of {0} as total size determined is {1} ', description, totalsize)
 
+            #print(curr_percentage_progress)
             #print(curr_percentage_progress)
             #urr_percentage_progress = int(100* float(downloaded/totalsize))
             #print(description, curr_percentage_progress)
             if self.download_progress is None:
-                description = self.protocol_downloader._downloaded_file_name
+                #description = self.protocol_downloader._downloaded_file_name
                 self.download_progress = tqdm(total=100, desc=description, disable=False)
             currprogress = curr_percentage_progress - self.download_progress.n
             self.download_progress.update(currprogress)

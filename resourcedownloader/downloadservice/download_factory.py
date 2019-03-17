@@ -21,6 +21,6 @@ class DownloadProtocolFactory(object):
         elif protocol =='ftp':
             return FTPDownloader
         elif protocol =='sftp':
-            return HTTPDownloader
+            return SFTPDownloader
         else:
             raise NotImplementedError ('the network protocol {0} is not supported yet'.format(protocol))
