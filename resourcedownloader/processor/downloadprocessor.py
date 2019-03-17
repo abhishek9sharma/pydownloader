@@ -2,11 +2,11 @@ from threading import  Thread
 from queue import  Queue,Empty
 from resourcedownloader.processor.resource import Resource
 
-# To do :
-    #attempt delete after exception Line 49
-    ##Result Queue May Be Delete or convert to failed queue
-    ##Exception format line 46
-    ##finnaly may be remove if runningdownloads is not required
+
+#TODO:     #attempt delete after exception Line 49
+#TODO:     ##Result Queue May Be Delete or convert to failed queue
+#TODO:     ##Exception format line 46
+#TODO:     ##finnaly may be remove if runningdownloads is not required
 
 
 class DownloadProcessor(Thread):

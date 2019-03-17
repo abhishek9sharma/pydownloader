@@ -2,6 +2,8 @@ from  resourcedownloader.downloadservice.download_factory import DownloadProtoco
 from tqdm import  tqdm
 import os
 
+#TODO: Remove Code from PlotProgress
+
 class Resource:
 
     def __init__(self, idx, resourceurl):

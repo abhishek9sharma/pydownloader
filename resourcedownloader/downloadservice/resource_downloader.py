@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 import  os, errno
 from  urllib.parse import urlparse
 
-#TODO: COnifgurable aphanumeric array
+#TODO: Conifgurable alphanumeric array
 
 class BaseDownloader(ABC):
 

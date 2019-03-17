@@ -9,14 +9,13 @@ import  time
 from tqdm import  tqdm
 
 
-#to do
-    # comsoidation based on Q or List?
-    # deletes from downloader or forced from her
-    # errors for 0 inputs
-    # No of threads configurable
-    # Network error such as wifi Temp Dir and Cleanup a possible way
-    # Main Process tqdm bar
-    # Write a Log Somewhere
+#TODO:     # comsoidation based on Q or List?
+#TODO:     # deletes from downloader or forced from her
+#TODO:     # errors for 0 inputs
+#TODO:     # No of threads configurable
+#TODO:     # Network error such as wifi Temp Dir and Cleanup a possible way
+#TODO:     # Main Process tqdm bar
+#TODO:     # Write a Log Somewhere
 
 
 class DownloadsProcessor:

@@ -3,9 +3,8 @@ import  os
 from ftplib import  FTP
 
 
-#TOD:
-    # Check for size compute failure in connect method line 20
-    #port configurable
+#TODO:     # Check for size compute failure in connect method line 20
+#TODO:    #port configurable
 
 class FTPDownloader(BaseDownloader):
     

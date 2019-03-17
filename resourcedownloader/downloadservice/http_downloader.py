@@ -2,10 +2,10 @@ from resourcedownloader.downloadservice.resource_downloader import BaseDownloade
 import os
 import  requests
 
-#TOD:
-    # Check for size compute failure in connect method line 20
-    # connection timeout configurable line 17
-    # Network error such as wifi Temp Dir and Cleanup a possible way
+
+#TODO:     # Check for size compute failure in connect method line 20
+#TODO:     # connection timeout configurable line 17
+#TODO:     # Network error such as wifi Temp Dir and Cleanup a possible way
 
 class HTTPDownloader(BaseDownloader):
     
