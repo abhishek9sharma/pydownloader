@@ -5,45 +5,45 @@ class FTPDownloader(BaseDownloader):
     
     def __init__(self, resourceurl, path_download_dir):
         super().__init__(resourceurl, path_download_dir)
-        self._ftpconnector = FTP()
-        self._remotepath = None
+        self.ftpconnector = FTP()
+        self.remotepath = None
 
     def connect(self):
 
         try:
 
-            host = self._parsed_url.hostname
-            port = self._parsed_url.port
+            host = self.parsed_url.hostname
+            port = self.parsed_url.port
             if port is None:
                 port =0
-            username = self._parsed_url.username
-            password = self._parsed_url.password
-            self._ftpconnector.connect(host= host, port= port)
-            self._ftpconnector.login( user = username, passwd= password)
-            self._remotepath = self._org_file_name
+            username = self.parsed_url.username
+            password = self.parsed_url.password
+            self.ftpconnector.connect(host= host, port= port)
+            self.ftpconnector.login( user = username, passwd= password)
+            self.remotepath = self.org_file_name
 
-            if self._remotedir:
-                self._ftpconnector.cwd(self._remotedir)
-                self._remotepath = os.path.join(self._remotedir , self._remotepath)
+            if self.remotedir:
+                self.ftpconnector.cwd(self.remotedir)
+                self.remotepath = os.path.join(self.remotedir , self.remotepath)
 
-            if not(self._remotepath):
-                self._remotepath = self._org_file_name
+            if not(self.remotepath):
+                self.remotepath = self.org_file_name
 
-            self._size_of_file_to_download = self._ftpconnector.size(self._remotepath)
-            if self._size_of_file_to_download == 0:
+            self.size_of_file_to_download = self.ftpconnector.size(self.remotepath)
+            if self.size_of_file_to_download == 0:
                 #Not sure if this is actually required except for tracking progress
-                raise Exception( " Not Able to determine length of the content to be downloaded for url {0}", self._resourceurl)
+                raise Exception( " Not Able to determine length of the content to be downloaded for url {0}", self.resourceurl)
 
         except Exception as e:
-                print(e, " aborting download for {0} due to exception while making ftp connection", self._resourceurl)
+                print(e, " aborting download for {0} due to exception while making ftp connection", self.resourceurl)
                 self.abortdownload()
 
     def disconnect(self):
-        if self._ftpconnector.sock:
+        if self.ftpconnector.sock:
             try:
-                self._ftpconnector.quit()
+                self.ftpconnector.quit()
             except:
-                self._ftpconnector.close()
+                self.ftpconnector.close()
 
     def abortdownload(self):
         try:
@@ -60,11 +60,11 @@ class FTPDownloader(BaseDownloader):
             super().download_resource()
             #self.set_download_file_path()
             self.connect()
-            with open(self._path_downloaded_file, 'wb') as f:
+            with open(self.path_downloaded_file, 'wb') as f:
                 def download_chunk(chunk):
-                    self._size_of_file_downloaded += f.write(chunk)
-                self._ftpconnector.retrbinary('RETR ' + self._org_file_name, download_chunk, blocksize=self._chunksize)
+                    self.size_of_file_downloaded += f.write(chunk)
+                self.ftpconnector.retrbinary('RETR ' + self.org_file_name, download_chunk, blocksize=self.chunksize)
             self.disconnect()
         except Exception as e:
-            print(e, " aborting download for {0} due to some exception while downloading", self._resourceurl)
+            print(e, " aborting download for {0} due to some exception while downloading", self.resourceurl)
             self.abortdownload()

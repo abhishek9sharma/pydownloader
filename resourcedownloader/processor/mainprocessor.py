@@ -12,14 +12,14 @@ from tqdm import  tqdm
 class DownloadsProcessor(object):
 
     def __init__(self, resourceurlslist, path_download_dir):
-        self._resourceurls = resourceurlslist
-        self._path_download_dir = os.path.join(path_download_dir)
+        self.resourceurls = resourceurlslist
+        self.path_download_dir = os.path.join(path_download_dir)
         
-        if len(self._resourceurls)==0:
+        if len(self.resourceurls)==0:
             print( " No urls specified. Please provide resource links need to be downloade")
             return
 
-        if self._path_download_dir=='' or self._path_download_dir is None:
+        if self.path_download_dir=='' or self.path_download_dir is None:
             print( " Download directory is not specified or is invalid. Please check ")
             return
 
@@ -31,7 +31,7 @@ class DownloadsProcessor(object):
         self.runnningdownloads = []
         self.mainprocessprogress = None
 
-        for idx,resourceurl in enumerate(self._resourceurls):
+        for idx,resourceurl in enumerate(self.resourceurls):
             resourceobj = Resource(idx, resourceurl)
             if resourceobj.protocolresolved:
                 statusvalue = "Resolved Protocol Ready for Download"
@@ -44,8 +44,8 @@ class DownloadsProcessor(object):
                 resourceobj.set_status(statusvalue)
                            
             self.resources[idx] = resourceobj      
-         
-        self._threadsize = 6
+       
+        self.threadsize = 6
 
     def delete_failed_downloads(self):
         for resourceidx in self.results['Failed']:
@@ -88,12 +88,12 @@ class DownloadsProcessor(object):
                     #check if failed downloads can be deleted from here
 
                 time.sleep(1)
+            self.delete_failed_downloads()
             #print(" Completed Downloading Resources")
         except:
-            print('Some execption occured in monitor process')
-        finally:
-            print('Deleting all failed downloads')
+            #print('Some execption occured in monitor process')
             self.delete_failed_downloads()
+
             #Consoolidation: Remove files for failed downloade if still present
 
 
@@ -105,8 +105,8 @@ class DownloadsProcessor(object):
             progress_monitor.start()
 
             
-            for threadidx in range(self._threadsize):
-                jobprocessor = DownloadProcessor(self.jobqueue, self.resultqueue, self.resources, self._path_download_dir,self.runnningdownloads, self.results)
+            for threadidx in range(self.threadsize):
+                jobprocessor = DownloadProcessor(self.jobqueue, self.resultqueue, self.resources, self.path_download_dir,self.runnningdownloads, self.results)
                 #jobprocessor = Thread(target= self.worker)
                 jobprocessor.start()
 
