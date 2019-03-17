@@ -10,6 +10,7 @@ class BaseDownloader(ABC):
         self._path_download_dir = path_download_dir
         self._parsed_url = urlparse(self._resourceurl)
         self._org_file_name = self.set_org_file_name()
+        self._remotedir = os.path.dirname(self._parsed_url.path)
         self._path_downloaded_file = None
         self._size_of_file_to_download = None
         self._size_of_file_downloaded = 0
@@ -29,7 +30,8 @@ class BaseDownloader(ABC):
         try:
             return os.path.basename(self._parsed_url.path)
         except:
-            return  None
+            print("Could not find remote file name for resource {0}", self._resourceurl)
+            #return  None
 
     def get_download_path(self):
         return self._path_downloaded_file
@@ -39,32 +41,45 @@ class BaseDownloader(ABC):
         try:
             # may be move to utils 
             #change for all alphanumeric
-            # what if file already exists 
-            netloc = self._parsed_url.netloc.replace('.','_').replace(':','')
+            # what if file already exists
+            hostnamechars =['.',':','@']# Load from Config pleas
+            netloc = self._parsed_url.netloc
+            for char in hostnamechars:
+                netloc = netloc.replace(char,'_')
+
             self._downloaded_file_name = netloc+ '_'+ self._org_file_name
-            self._path_downloaded_file = os.path.join(self._path_download_dir, self._downloaded_file_name )
-        except:
-            self._path_downloaded_file = None
+            self._path_downloaded_file = os.path.join(self._path_download_dir, self._downloaded_file_name)
+            if self._path_downloaded_file is None:
+                raise Exception('Cannot set download file path for resource {0}', self._resourceurl)
+        except Exception as e:
+            print(e)
+            raise e
 
     def download_resource(self):
         try:
-            self._path_downloaded_file = self.set_download_file_path()
+            self.set_download_file_path()
         except:
-            pass
+            self._path_downloaded_file = None
 
     def delete_file(self):
         if self._path_downloaded_file is None:
             pass
         else:
-            if  os.path.exists(self._path_downloaded_file):
-                print( " Deleteting file {0} downladed with respect to URL {0}", self._path_downloaded_file, self._resourceurl )
-                os.remove(self._path_downloaded_file)
+            try:
+                if  os.path.exists(self._path_downloaded_file):
+                    print( " Deleteting file {0} downladed with respect to URL {0}", self._path_downloaded_file, self._resourceurl )
+                    os.remove(self._path_downloaded_file)
+            except:
+                print (' Error occured while removiing file {0}', self._path_downloaded_file)
 
 
     
     def get_download_progress(self):
         description = self._downloaded_file_name# + ' is being downloaded at' + self._path_download_dir + self._downloaded_file_name
-        return description, self._size_of_file_downloaded, self._size_of_file_to_download
+        curr_percentage_progress =0
+        if self._size_of_file_downloaded and self._size_of_file_to_download and self._size_of_file_to_download!=0:
+            curr_percentage_progress= int(100 * float(self._size_of_file_downloaded / self._size_of_file_to_download))
+        return description, self._size_of_file_downloaded, self._size_of_file_to_download, curr_percentage_progress
 
 
 

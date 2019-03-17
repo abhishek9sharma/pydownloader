@@ -24,15 +24,26 @@ class Resource(object):
 
     def plot_progress(self):
         if self.protocolresolved and self.protocol_downloader:
-            description, downloaded, totalsize = self.protocol_downloader.get_download_progress()            
+            description, downloaded, totalsize, curr_percentage_progress = self.protocol_downloader.get_download_progress()
+            if totalsize==0:
+                print('Cannot track progress of {0} as total size determined is {1} ', description, totalsize)
+
+            #print(curr_percentage_progress)
+            #urr_percentage_progress = int(100* float(downloaded/totalsize))
+            #print(description, curr_percentage_progress)
             if self.download_progress is None:
-                #description = self.protocol_downloader._downloaded_file_name
-                downloadsize = self.protocol_downloader._chunksize
-                downloadunit = self.protocol_downloader._chunkunit
-                self.download_progress = tqdm(total=totalsize, desc=description,  unit_divisor=downloadsize,
-                                                     unit_scale=True, unit=downloadunit, disable = False)
-            curr_advancement = downloaded - self.download_progress.n
-            self.download_progress.update(curr_advancement)
+                description = self.protocol_downloader._downloaded_file_name
+                self.download_progress = tqdm(total=100, desc=description, disable=False)
+            currprogress = curr_percentage_progress - self.download_progress.n
+            self.download_progress.update(currprogress)
+
+            # if self.download_progress is None:
+            #     downloadsize = self.protocol_downloader._chunksize
+            #     downloadunit = self.protocol_downloader._chunkunit
+            #     self.download_progress = tqdm(total=totalsize, desc=description,  unit_divisor=downloadsize,
+            #                                  unit_scale=True, unit= downloadunit, disable = False)
+            # curr_advancement = downloaded - self.download_progress.n
+            # self.download_progress.update(curr_advancement)
         else:
             return
 

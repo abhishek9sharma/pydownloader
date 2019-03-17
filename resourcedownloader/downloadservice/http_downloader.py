@@ -1,8 +1,6 @@
 from resourcedownloader.downloadservice.resource_downloader import BaseDownloader
 import os
 import  requests
-from tqdm import  tqdm
-import math
 
 class HTTPDownloader(BaseDownloader):
     
@@ -20,9 +18,10 @@ class HTTPDownloader(BaseDownloader):
             self._response.raise_for_status()
             self._size_of_file_to_download = int(self._response.headers.get('content-length', 0))
             if self._size_of_file_to_download == 0:
+                # Not sure if this is actually required except for tracking progress
                 raise Exception( " Not Able to determine length of the content to be downloaded for url {0}", self._resourceurl)
-        except :
-            pass
+        except  Exception as e:
+            raise e
             #Add code for handling the case where header does not case content length or any other exception that may occur while setting up
             # connection
 
@@ -32,14 +31,15 @@ class HTTPDownloader(BaseDownloader):
 
     def abortdownload(self):
         try:
-            self.delete_file()
             self.disconnect()
+            self.delete_file()
         except:
             pass
 
     def download_resource(self):
         try:
-            self.set_download_file_path()
+            #self.set_download_file_path()
+            super().download_resource()
             self.connect()
             #print('donloading file for url', self._resourceurl)
             with open(self._path_downloaded_file, 'wb') as f:
@@ -54,9 +54,6 @@ class HTTPDownloader(BaseDownloader):
             print(e, " aborting download for {0} due to some exception while downloading", self._resourceurl)
             self.abortdownload()
 
-    # def get_download_progress(self):
-    #     #description = self._downloaded_file_name + ' is being downloaded at' + self._path_download_dir + self._downloaded_file_name
-    #     return self._size_of_file_downloaded, self._size_of_file_to_download
 
 
 
