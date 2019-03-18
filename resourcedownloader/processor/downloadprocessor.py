@@ -2,6 +2,7 @@ from threading import  Thread
 from queue import  Queue,Empty
 from resourcedownloader.processor.resource import Resource
 import  os
+from pathlib import Path
 
 #TODO:     #attempt delete after exception Line 63
 #TODO:     ##Exception format line 56
@@ -11,16 +12,26 @@ import  os
 class DownloadProcessor(Thread):
     
     #def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload, runningdownloads, results):
-    def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload, config_path ='Config/config.ini'):
+    def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload, config_path = None):
         Thread.__init__(self)
         self.threadtempid = str(threadidx)
         self.jobqueue = jobqueue
         self.failedqueue = failedqueue
         self.resources= resources
         self.pathtodownload = pathtodownload
-        self.configpath =  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+        self.config_path =  self.set_config_path(config_path)
         #self.runnningdownloads = runningdownloads
         #self.results = results
+
+    def set_config_path(self, config_path):
+        try:
+            if config_path is None:
+                return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
+            else:
+                return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+        except:
+            return  None
+    
 
     def run(self):
          while True:
@@ -38,7 +49,7 @@ class DownloadProcessor(Thread):
                 curr_resource.update_status(statusval)
                 
                 protocoldownloaderclass = curr_resource.protocolclass
-                curr_resource.protocol_downloader = protocoldownloaderclass(curr_resource.resourceurl, self.pathtodownload)                 
+                curr_resource.protocol_downloader = protocoldownloaderclass(curr_resource.resourceurl, self.pathtodownload, self.config_path)
                 #self.runnningdownloads.append(resourceidx) # should use some other data structure as compared to list
                 statusval = 'Downloader Object Attached in Thread :'
                 curr_resource.update_status(statusval)
@@ -46,7 +57,7 @@ class DownloadProcessor(Thread):
                 file_idx = self.threadtempid + '_'+ str(resourceidx)
                 statusval = 'Calling Download Method of Downloader :'
                 curr_resource.update_status(statusval)                
-                curr_resource.protocol_downloader.download_resource(file_idx, self.configpath)
+                curr_resource.protocol_downloader.download_resource(file_idx)
                 curr_resource.set_downloadfilepath(curr_resource.protocol_downloader.get_download_path())
                 #self.results['Completed'].append(resourceidx)
                 #self.runnningdownloads.remove(resourceidx)

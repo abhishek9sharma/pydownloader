@@ -3,12 +3,13 @@ import  os, errno
 from  urllib.parse import urlparse
 from datetime import  datetime
 from configparser import  ConfigParser
+from path import Path
 
 #TODO : Remove commented Code
 
 class BaseDownloader(ABC):
 
-    def __init__(self, resourceurl, path_download_dir):
+    def __init__(self, resourceurl, path_download_dir, config_path = None):
         self.resourceurl = resourceurl
         self.path_download_dir = path_download_dir
         self.parsed_url = urlparse(self.resourceurl)
@@ -22,19 +23,30 @@ class BaseDownloader(ABC):
         self.port = 0
         self.delete_successful = False
         self.connectionactive = False
+        self.config_path = self.set_config_path(config_path)
         self.configparser = None
 
         # self.chunkunit = 'b'
         # self.downloadprogress = None
 
-
-    def set_config(self, config_path):
+    def set_config_path(self, config_path):
+        try:
+            if config_path is None:
+                return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
+            else:
+                return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+        except:
+            return  None
+        
+    def set_config(self):
         try:
             config_parser = ConfigParser()
-            config_path= os.path.join(os.path.dirname(config_path), os.path.basename(config_path))
+            config_path = self.config_path
+            if config_path is None:
+                raise ValueError(' config file is not set ')
             data = config_parser.read(config_path)
             if len(data)==0:
-                raise ValueError(' Could not load data from configuration ' )
+                raise ValueError(' Could not load configuration data ' )
             else:
                 self.configparser = config_parser
                 self.set_chunksize()
@@ -83,9 +95,9 @@ class BaseDownloader(ABC):
         except Exception as e:
             raise
 
-    def download_resource(self, resourceidx, config_path ='Config/config.ini'):
+    def download_resource(self, resourceidx):
         try:
-            self.set_config(config_path)
+            self.set_config()
             self.set_download_file_path(resourceidx)
         except:
             raise

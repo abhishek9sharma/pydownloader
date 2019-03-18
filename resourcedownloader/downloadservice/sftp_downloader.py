@@ -10,8 +10,8 @@ import  os
 
 class SFTPDownloader(BaseDownloader):
     
-    def __init__(self, resourceurl, path_download_dir):
-        super().__init__(resourceurl, path_download_dir)
+    def __init__(self, resourceurl, path_download_dir, config_path = None):
+        super().__init__(resourceurl, path_download_dir,  config_path)
         #cnopts = pysftp.CnOpts()
         #cnopts.hostkeys = None
         self.pysftpref = pysftp
@@ -80,9 +80,9 @@ class SFTPDownloader(BaseDownloader):
             self.port = 22 # default set to continue process
 
 
-    def download_resource(self, resourceidx, config_path ='Config/config.ini'):
+    def download_resource(self, resourceidx):
         try:
-            super().download_resource(resourceidx, config_path)
+            super().download_resource(resourceidx)
             self.connect()
 
             def update_progress(bytestransferred, bytesleft):

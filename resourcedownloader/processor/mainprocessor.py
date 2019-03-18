@@ -9,6 +9,7 @@ import  errno
 import  time
 from tqdm import  tqdm
 from configparser import  ConfigParser
+from pathlib import  Path
 
 #TODO:     # Q used Needs to B Tested # Network error such as wifi Temp Dir and Cleanup a possible way
 #TODO:     # Write a Log Somewhere
@@ -20,12 +21,13 @@ from configparser import  ConfigParser
 
 class DownloadsProcessor:
 
-    def __init__(self, resourceurlslist, path_download_dir, config_path ='Config/config.ini'):
+    def __init__(self, resourceurlslist, path_download_dir, config_path = None):
         self.resourceurls = resourceurlslist
         self.path_download_dir = os.path.join(path_download_dir)
-        self.configpath = os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+        self.config_path = self.set_config_path(config_path)
         self.configparser = None
         
+
         if len(self.resourceurls)==0:
             print( " No urls specified. Please provide resource links need to be downloade")
             return
@@ -57,10 +59,19 @@ class DownloadsProcessor:
        
         self.threadsize = 2
 
+    def set_config_path(self, config_path):
+        try:
+            if config_path is None:
+                return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
+            else:
+                return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+        except:
+            return  None
+
     def load_config(self):
         try:
             self.configparser = ConfigParser()
-            configdata =self.configparser.read(self.configpath)
+            configdata =self.configparser.read(self.config_path)
             if configdata and len(configdata)>0:
                 pass
             else:
@@ -132,9 +143,7 @@ class DownloadsProcessor:
         """Monitors the progress of Resources waiting download in queue and also clears downloads in failed queue"""
         try:
             while True:
-                if self.jobqueue.unfinished_tasks == 0:
-                    break
-
+            
                 #Track Main Processor
                 # if self.mainprocessprogress is None:
                 #     desc = " Total Progress over all jobs "
@@ -146,16 +155,21 @@ class DownloadsProcessor:
 
                 for k,resourceobj in self.resources.items():
                     resourceobj.plot_progress()                
+
+                if self.jobqueue.unfinished_tasks == 0:
+                    #time.sleep(10)
+                    break
                 self.check_failed_downloads_deletion()                
                 time.sleep(1)
             
+            #tqdm.write('Finished')
             self.check_failed_downloads_deletion()
         except:
             self.check_failed_downloads_deletion()
             raise
 
 
-    def process_resources(self):
+    def download_resources(self):
         try:
             self.load_config()
             if self.configparser:
@@ -173,7 +187,7 @@ class DownloadsProcessor:
 
             for threadidx in range(noofthreads):
                 #jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir,self.runnningdownloads, self.results)
-                jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir, self.configpath)
+                jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir, self.config_path)
                 jobprocessor.start()
 
             self.jobqueue.join()
@@ -184,6 +198,6 @@ class DownloadsProcessor:
             self.check_failed_downloads_deletion()            
             self.failedqueue.join()
             time.sleep(5)
-            print(" \nCompleted current iteration for Downloading Resources")
+            print(" \n Completed current iteration for Processing (Downloading) Resources")
 
 

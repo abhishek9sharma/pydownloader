@@ -1,18 +1,19 @@
 from  resourcedownloader.downloadservice.download_factory import DownloadProtocolFactory
 from tqdm import  tqdm
 import os
+from pathlib import Path
 
 #TODO: Remove Code from PlotProgress
 #TODO : Remove commented Code
 
 class Resource:
 
-    def __init__(self, idx, resourceurl,  config_path = 'Config/config.ini'):
+    def __init__(self, idx, resourceurl,  config_path = None):
         """construtor for url that needs to be downloaded"""
         self.resourceidx = idx
         self.resourceurl = resourceurl
-        self.configpath = os.path.join(os.path.dirname(config_path), os.path.basename(config_path))
-        self.protocolclass = DownloadProtocolFactory.get_protocol(self.resourceurl, self.configpath)
+        self.config_path = self.set_config_path(config_path)
+        self.protocolclass = DownloadProtocolFactory.get_protocol(self.resourceurl, self.config_path)
         self.protocolresolved = True if self.protocolclass else False
         self.protocol_downloader = None
         self.status = "Failed : Undefined Protocol" if not(self.protocolresolved) else ""
@@ -32,6 +33,14 @@ class Resource:
             newstatus = currstatus + ':' + str(statusvalue).replace(':','')
             self.set_status(newstatus)
 
+    def set_config_path(self, config_path):
+        try:
+            if config_path is None:
+                return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
+            else:
+                return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+        except:
+            return  None
     
     def get_status(self):
         return self.status
@@ -53,8 +62,12 @@ class Resource:
             if self.download_progress is None:
                 #description = self.protocol_downloader.downloaded_file_name
                 self.download_progress = tqdm(total=100, desc=description, disable=False)
-            currprogress = curr_percentage_progress - self.download_progress.n
-            self.download_progress.update(currprogress)
+            
+            if self.download_progress.n==100:
+                pass
+            else:
+                currprogress = curr_percentage_progress - self.download_progress.n
+                self.download_progress.update(currprogress)
 
             # if self.download_progress is None:
             #     downloadsize = self.protocol_downloader.chunksize

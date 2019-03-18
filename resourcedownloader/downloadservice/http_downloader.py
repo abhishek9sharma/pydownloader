@@ -10,8 +10,8 @@ import  requests
 
 class HTTPDownloader(BaseDownloader):
     
-    def __init__(self, resourceurl, path_download_dir):
-        super().__init__(resourceurl, path_download_dir)
+    def __init__(self, resourceurl, path_download_dir,  config_path = None):
+        super().__init__(resourceurl, path_download_dir,  config_path)
         self.response = None
 
     def connect(self):
@@ -46,9 +46,9 @@ class HTTPDownloader(BaseDownloader):
         finally:
             self.delete_file()
 
-    def download_resource(self, resourceidx, config_path ='Config/config.ini'):
+    def download_resource(self, resourceidx):
         try:
-            super().download_resource(resourceidx, config_path)
+            super().download_resource(resourceidx)
             self.connect()
             with open(self.path_downloaded_file, 'wb') as f:
                     for current_chunk in self.response.iter_content(chunk_size = self.chunksize):
