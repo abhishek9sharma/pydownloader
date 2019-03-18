@@ -6,7 +6,7 @@ import  os
 #TODO:     # Check for size compute failure in connect method line 20
 #TODO:     #port configurable
 #TODO: handle timeout
-
+#TODO : Remove commented Code
 
 
 class SFTPDownloader(BaseDownloader):
@@ -34,13 +34,16 @@ class SFTPDownloader(BaseDownloader):
             if self.remotedir:
                 self.sftpconnector.cwd(self.remotedir)
                 self.remotepath = os.path.join(self.remotedir , self.remotepath)
-
+            self.connectionactive = True
+            
             # Compute size of file
             if not(self.remotepath):
                 self.remotepath = self.org_file_name
+            
 
             # raise exception if file size cannot be determined
             self.size_of_file_to_download = self.sftpconnector.stat(self.remotepath).st_size
+            
             if self.size_of_file_to_download == 0:
                 #Not sure if this is actually required except for tracking progress
                 raise Exception( " Not Able to determine length of the content to be downloaded for url {0}", self.resourceurl)
@@ -51,6 +54,7 @@ class SFTPDownloader(BaseDownloader):
     def disconnect(self):
         try:
             self.sftpconnector.close()
+            self.connectionactive = False
         except:
             raise
 

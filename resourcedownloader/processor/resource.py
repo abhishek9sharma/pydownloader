@@ -3,6 +3,7 @@ from tqdm import  tqdm
 import os
 
 #TODO: Remove Code from PlotProgress
+#TODO : Remove commented Code
 
 class Resource:
 
@@ -20,7 +21,16 @@ class Resource:
         self.exceptions_if_failed = []
    
     def set_status(self, statusvalue):
-        self.status = statusvalue
+        self.status = str(statusvalue)
+  
+    def update_status(self, statusvalue):
+        currstatus = str(self.get_status())
+        if currstatus =='':
+            self.set_status(str(statusvalue))
+        else:
+            newstatus = currstatus + ':' + str(statusvalue).replace(':','')
+            self.set_status(newstatus)
+
     
     def get_status(self):
         return self.status

@@ -3,7 +3,8 @@ import  os, errno
 from  urllib.parse import urlparse
 from datetime import  datetime
 
-#TODO: Conifgurable alphanumeric array timestmapmformat
+#TODO: Conifgurable alphanumeric array/ timestmapmformat
+#TODO : Remove commented Code
 
 class BaseDownloader(ABC):
 
@@ -19,6 +20,7 @@ class BaseDownloader(ABC):
         self.size_of_file_downloaded = 0
         self.chunksize = 1024
         self.delete_successful = False
+        self.connectionactive = False
         # self.chunkunit = 'b'
         # self.downloadprogress = None
 
@@ -65,8 +67,10 @@ class BaseDownloader(ABC):
                 os.remove(self.path_downloaded_file)
                 self.deletesuccessful = True
             except OSError as osexcp:
-                if osexcp.errno != errno.ENOENT:
-                    raise 
+                if osexcp.errno == errno.ENOENT:
+                    self.delete_successful = True #check this later
+                else:
+                    raise
 
     
     def get_download_progress(self):

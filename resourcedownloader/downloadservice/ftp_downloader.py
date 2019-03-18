@@ -6,6 +6,7 @@ from ftplib import  FTP
 #TODO:     # Check for size compute failure in connect method line 20
 #TODO:    #port configurable
 #TODO: handle timeout
+#TODO : Remove commented Code
 
 class FTPDownloader(BaseDownloader):
     
@@ -27,7 +28,8 @@ class FTPDownloader(BaseDownloader):
             password = self.parsed_url.password
             self.ftpconnector.connect(host= host, port= port)
             self.ftpconnector.login( user = username, passwd= password)
-
+            self.connectionactive = True
+            
             #Compute size of file
             self.remotepath = self.org_file_name
             if self.remotedir:
@@ -36,7 +38,6 @@ class FTPDownloader(BaseDownloader):
             if not(self.remotepath):
                 self.remotepath = self.org_file_name
             self.size_of_file_to_download = self.ftpconnector.size(self.remotepath)
-
             #raise exception if file size cannot be determined
             if self.size_of_file_to_download == 0:
                 #Not sure if this is actually required except for tracking progress
@@ -49,9 +50,11 @@ class FTPDownloader(BaseDownloader):
         if self.ftpconnector.sock:
             try:
                 self.ftpconnector.quit()
+                self.connectionactive = False
             except:
                 self.ftpconnector.close()
-
+                self.connectionactive = False
+    
     def abortdownload(self):
         try:
             self.disconnect()

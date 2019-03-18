@@ -3,22 +3,23 @@ from queue import  Queue,Empty
 from resourcedownloader.processor.resource import Resource
 
 
-#TODO:     #attempt delete after exception Line 49
-#TODO:     ##Result Queue May Be Delete or convert to failed queue
-#TODO:     ##Exception format line 46
-#TODO:     ##finnaly may be remove if runningdownloads is not required
-
+#TODO:     #attempt delete after exception Line 63
+#TODO:     ##Exception format line 56
+#TODO:     ##what if failure while adding to faile queue
+#TODO : Remove commented Code
 
 class DownloadProcessor(Thread):
-    def __init__(self, threadidx, jobqueue, resultqueue, resources, pathtodownload, runningdownloads, results):
+    
+    #def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload, runningdownloads, results):
+    def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload):
         Thread.__init__(self)
         self.threadtempid = str(threadidx)
         self.jobqueue = jobqueue
-        self.resultqueue = resultqueue
+        self.failedqueue = failedqueue
         self.resources= resources
         self.pathtodownload = pathtodownload
-        self.runnningdownloads = runningdownloads
-        self.results = results
+        #self.runnningdownloads = runningdownloads
+        #self.results = results
 
     def run(self):
          while True:
@@ -32,39 +33,41 @@ class DownloadProcessor(Thread):
 
             try:
                 curr_resource = self.resources[resourceidx]                
+                statusval = 'Resource Index Extracted in Download Thread :'
+                curr_resource.update_status(statusval)
+                
                 protocoldownloaderclass = curr_resource.protocolclass
                 curr_resource.protocol_downloader = protocoldownloaderclass(curr_resource.resourceurl, self.pathtodownload)                 
-                self.runnningdownloads.append(resourceidx) # should use some other data structure as compared to list
+                #self.runnningdownloads.append(resourceidx) # should use some other data structure as compared to list
+                statusval = 'Downloader Object Attached in Thread :'
+                curr_resource.update_status(statusval)
                 
-                statusval = 'Download Started'
-                curr_resource.set_status(statusval)
                 file_idx = self.threadtempid + '_'+ str(resourceidx)
+                statusval = 'Calling Download Method of Downloader :'
+                curr_resource.update_status(statusval)                
                 curr_resource.protocol_downloader.download_resource(file_idx)
                 curr_resource.set_downloadfilepath(curr_resource.protocol_downloader.get_download_path())
-                self.runnningdownloads.remove(resourceidx)
-
-                # check addtions to resultqueue and results
-                statusval = 'Download Completed'
-                curr_resource.set_status(statusval)
-                self.resultqueue.put((resourceidx, statusval))
-                self.results['Completed'].append(resourceidx)
-
+                #self.results['Completed'].append(resourceidx)
+                #self.runnningdownloads.remove(resourceidx)
+                statusval = 'Download Completed :'
+                curr_resource.update_status(statusval)
+                
             #checl if below is right format
             except Exception as e:
-
-                # check addtions to resultqueue and results
-                statusval = 'Failed while downloading'
-                self.resources[resourceidx].set_status(statusval)
-                self.resources[resourceidx].exceptions_if_failed.append(e)
-                self.resultqueue.put((resourceidx, statusval))
-                self.results['Failed'].append(resourceidx)
-                #may be attempt a delete here
+                # check addtions to failedqueue and results
+                statusval = 'Failed while downloading :'
+                curr_resource = self.resources[resourceidx]               
+                curr_resource.update_status(statusval)
+                self.failedqueue.put((resourceidx, statusval))
+                curr_resource.exceptions_if_failed.append(e)
+                #self.results['Failed'].append(resourceidx)
+                #may be attempt a delete here may be not as waste of time
                 #self.jobqueue.task_done()
-            finally:
-                if resourceidx not in self.resources:
-                    pass
-                else:
-                    if resourceidx in self.runnningdownloads:
-                        self.runnningdownloads.remove(resourceidx)
+            # finally:
+            #     if resourceidx not in self.resources:
+            #         pass
+            #     else:
+            #         if resourceidx in self.runnningdownloads:
+            #             self.runnningdownloads.remove(resourceidx)
 
             self.jobqueue.task_done()
