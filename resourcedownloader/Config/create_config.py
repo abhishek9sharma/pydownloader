@@ -15,7 +15,7 @@ config['ports']={
 }
 
 config['chunksizes']={
-'http:' :'1024',
+'http' :'1024',
 'ftp':'1024',
 'sftp':'1024',
 }

@@ -50,8 +50,8 @@ class FTPDownloader(BaseDownloader):
             if self.remotedir:
                 self.ftpconnector.cwd(self.remotedir)
                 self.remotepath = os.path.join(self.remotedir , self.remotepath)
-            if not(self.remotepath):
-                self.remotepath = self.org_file_name
+            #if not(self.remotepath):
+            #    self.remotepath = self.org_file_name
             self.size_of_file_to_download = self.ftpconnector.size(self.remotepath)
             #raise exception if file size cannot be determined
             if self.size_of_file_to_download == 0:

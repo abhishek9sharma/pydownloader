@@ -38,11 +38,11 @@ class SFTPDownloader(BaseDownloader):
                 self.remotepath = os.path.join(self.remotedir , self.remotepath)
             self.connectionactive = True
             
-            # Compute size of file
-            if not(self.remotepath):
-                self.remotepath = self.org_file_name
+            #if not(self.remotepath):
+            #    self.remotepath = self.org_file_name
             
-
+            # Compute size of file
+            
             # raise exception if file size cannot be determined
             self.size_of_file_to_download = self.sftpconnector.stat(self.remotepath).st_size
             
