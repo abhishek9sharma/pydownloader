@@ -4,7 +4,7 @@ import  os
 
 
 #TODO:     # Check for size compute failure in connect method line 20
-#TODO: handle timeout
+#TODO: handle timeout exception
 #TODO : Remove commented Code
 
 
@@ -31,7 +31,9 @@ class SFTPDownloader(BaseDownloader):
                 port = self.port
             username = self.parsed_url.username
             password = self.parsed_url.password
+                       
             self.sftpconnector = self.pysftpref.Connection(host, username = username, password = password, port = port)
+            self.sftpconnector.timeout = self.timeout
             self.remotepath = self.org_file_name
             if self.remotedir:
                 self.sftpconnector.cwd(self.remotedir)
@@ -99,6 +101,7 @@ class SFTPDownloader(BaseDownloader):
                     raise
         except:
             self.abortdownload()
+            raise
 
     
 

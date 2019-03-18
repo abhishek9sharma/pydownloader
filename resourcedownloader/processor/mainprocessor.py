@@ -12,12 +12,13 @@ from configparser import  ConfigParser
 from pathlib import  Path
 
 
-#TODO:     # Q used Needs to B Tested # Network error such as wifi Temp Dir and Cleanup a possible way
+#TODO:     # check SFTP Console Exception
 #TODO:     # Write a Log Somewhere
-#TODO:     # errors for 0 inputs
-#TODO :     #remove commented code
+#TODO:     # errors for 0 inputs/Packaging
 #TODO:     #Detailed Logging at each faiure
+#TODO :     #remove commented code
 #TODO:     # Main Process Check if to keep or remove
+#TODO :    #Temp Dir and Cleanup a possible way
 
 
 class DownloadsProcessor:
@@ -175,7 +176,7 @@ class DownloadsProcessor:
                     #self.plot_progress_individual()
                     time.sleep(5)
                     break              
-                #self.check_failed_downloads_deletion() 
+                self.check_failed_downloads_deletion() 
                
                                             
             self.check_failed_downloads_deletion()

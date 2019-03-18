@@ -14,6 +14,14 @@ config['ports']={
 'sftp':'22',
 }
 
+
+config['timeouts']={
+'http' :'60',
+'ftp':'60',
+'sftp':'60',
+}
+
+
 config['chunksizes']={
 'http' :'1024',
 'ftp':'1024',

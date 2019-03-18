@@ -4,7 +4,6 @@ from ftplib import  FTP
 from configparser import  ConfigParser
 
 #TODO:     # Check for size compute failure in connect method line 20
-#TODO: handle timeout
 #TODO : Remove commented Code
 
 class FTPDownloader(BaseDownloader):
@@ -29,7 +28,6 @@ class FTPDownloader(BaseDownloader):
     def connect(self):
 
         try:
-
             #Establish Connection
             host = self.parsed_url.hostname
             port = self.parsed_url.port
@@ -41,7 +39,7 @@ class FTPDownloader(BaseDownloader):
 
             username = self.parsed_url.username
             password = self.parsed_url.password
-            self.ftpconnector.connect(host= host, port= port)
+            self.ftpconnector.connect(host= host, port= port, timeout = self.timeout)
             self.ftpconnector.login( user = username, passwd= password)
             self.connectionactive = True
             
@@ -96,3 +94,4 @@ class FTPDownloader(BaseDownloader):
                     raise
         except:
             self.abortdownload()
+            raise

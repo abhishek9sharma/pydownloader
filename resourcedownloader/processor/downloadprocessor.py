@@ -4,7 +4,6 @@ from resourcedownloader.processor.resource import Resource
 import  os
 from pathlib import Path
 
-#TODO:     #attempt delete after exception Line 63
 #TODO:     ##Exception format line 56
 #TODO:     ##what if failure while adding to faile queue
 #TODO : Remove commented Code

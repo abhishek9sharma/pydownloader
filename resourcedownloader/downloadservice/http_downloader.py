@@ -4,8 +4,6 @@ import  requests
 
 
 #TODO:     # Check for size compute failure in connect method line 20
-#TODO:     # connection timeout configurable line 17 Also find and optimum value
-#TODO:     # Network error such as wifi Temp Dir and Cleanup a possible way
 #TODO : Remove commented Code
 
 class HTTPDownloader(BaseDownloader):
@@ -16,8 +14,7 @@ class HTTPDownloader(BaseDownloader):
 
     def connect(self):
         try:
-
-            self.response = requests.get(self.resourceurl, stream=True, timeout=60)
+            self.response = requests.get(self.resourceurl, stream=True, timeout = self.timeout)
             self.response.raise_for_status()
             self.size_of_file_to_download = int(self.response.headers.get('content-length', ))
             self.connectionactive = True

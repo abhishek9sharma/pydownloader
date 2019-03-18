@@ -25,6 +25,7 @@ class BaseDownloader(ABC):
         self.connectionactive = False
         self.config_path = self.set_config_path(config_path)
         self.configparser = None
+        self.timeout = 100
 
         # self.chunkunit = 'b'
         # self.downloadprogress = None
@@ -50,10 +51,21 @@ class BaseDownloader(ABC):
             else:
                 self.configparser = config_parser
                 self.set_chunksize()
+                self.set_timeout()
         except:
             # Did not raise error here so as to proceed with default configs
             self.configparser = None
 
+    def set_timeout(self):
+        try:
+            if self.configparser:
+                timeouts = self.configparser['timeouts']
+                timeout = timeouts.get(self.protocol, 100)
+                self.timeout = int(timeout)
+            else:
+                self.timeout = 100
+        except:
+            self.timeout = 100 # default set to continue process
 
     def set_chunksize(self):
         try:
