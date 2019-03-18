@@ -5,6 +5,7 @@ from ftplib import  FTP
 
 #TODO:     # Check for size compute failure in connect method line 20
 #TODO:    #port configurable
+#TODO: handle timeout
 
 class FTPDownloader(BaseDownloader):
     

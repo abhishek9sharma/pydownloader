@@ -22,7 +22,7 @@ class Resource:
     def set_status(self, statusvalue):
         self.status = statusvalue
     
-    def get_status(self, statusvalue):
+    def get_status(self):
         return self.status
 
     def set_downloadfilepath(self, path):

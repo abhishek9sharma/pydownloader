@@ -1,8 +1,9 @@
 from abc import abstractmethod, ABC
 import  os, errno
 from  urllib.parse import urlparse
+from datetime import  datetime
 
-#TODO: Conifgurable alphanumeric array
+#TODO: Conifgurable alphanumeric array timestmapmformat
 
 class BaseDownloader(ABC):
 
@@ -30,13 +31,20 @@ class BaseDownloader(ABC):
     def get_download_path(self):
         return self.path_downloaded_file
 
+    def get_cuurtime_str(self):
+        timestampformat = '%Y%m%d__%H%M%S'
+        currtime_str = str(datetime.now().strftime(timestampformat))
+        return  currtime_str
+
     def set_download_file_path(self, resourceidx):
         try:
-            hostnamechars =['.',':','@']# Load from Config pleas
-            netloc = self.parsed_url.netloc
-            for char in hostnamechars:
-                netloc = netloc.replace(char,'_')
-            self.downloaded_file_name = resourceidx +'_' + self.protocol + '_' + netloc+ '_'+ self.org_file_name
+            #hostnamechars =['.',':','@']# Load from Config pleas
+            #netloc = self.parsed_url.netloc
+            #for char in hostnamechars:
+            #    netloc = netloc.replace(char,'_')
+            #self.downloaded_file_name = resourceidx +'_' + self.get_cuurtime_str() + '_'+ self.protocol + '_' + netloc+ '_'+ self.org_file_name
+            self.downloaded_file_name = resourceidx + '_' +self.protocol +'_' + self.get_cuurtime_str() + '_' + self.org_file_name
+
             self.path_downloaded_file = os.path.join(self.path_download_dir, self.downloaded_file_name)
             if self.path_downloaded_file is None:
                 raise ValueError('Cannot set download file path for resource {0}', self.resourceurl)

@@ -10,12 +10,13 @@ from tqdm import  tqdm
 
 
 #TODO:     # comsoidation based on Q or List?
+#TODO:     # Write a Log Somewhere
 #TODO:     # deletes from downloader or forced from her
 #TODO:     # errors for 0 inputs
 #TODO:     # No of threads configurable
 #TODO:     # Network error such as wifi Temp Dir and Cleanup a possible way
+#TODO:     #Detailed Logging at each faiure
 #TODO:     # Main Process tqdm bar
-#TODO:     # Write a Log Somewhere
 
 
 class DownloadsProcessor:
@@ -54,7 +55,7 @@ class DownloadsProcessor:
                            
             self.resources[idx] = resourceobj      
        
-        self.threadsize = 6
+        self.threadsize = 2
 
     def delete_failed_downloads(self):
         #check if fetch from Queue thr resource idx
@@ -117,8 +118,9 @@ class DownloadsProcessor:
                 noofthreads = len(self.resourceurls)
             else:
                 noofthreads = self.threadsize
+
             for threadidx in range(noofthreads):
-                jobprocessor = DownloadProcessor(self.jobqueue, self.resultqueue, self.resources, self.path_download_dir,self.runnningdownloads, self.results)
+                jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.resultqueue, self.resources, self.path_download_dir,self.runnningdownloads, self.results)
                 jobprocessor.start()
 
             self.jobqueue.join()
