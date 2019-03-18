@@ -7,11 +7,12 @@ import os
 
 class Resource:
 
-    def __init__(self, idx, resourceurl):
+    def __init__(self, idx, resourceurl,  config_path = 'Config/config.ini'):
         """construtor for url that needs to be downloaded"""
         self.resourceidx = idx
         self.resourceurl = resourceurl
-        self.protocolclass = DownloadProtocolFactory.get_protocol(self.resourceurl)
+        self.configpath = os.path.join(os.path.dirname(config_path), os.path.basename(config_path))
+        self.protocolclass = DownloadProtocolFactory.get_protocol(self.resourceurl, self.configpath)
         self.protocolresolved = True if self.protocolclass else False
         self.protocol_downloader = None
         self.status = "Failed : Undefined Protocol" if not(self.protocolresolved) else ""

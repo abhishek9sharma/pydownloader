@@ -1,10 +1,9 @@
 from resourcedownloader.downloadservice.resource_downloader import BaseDownloader
 import  os
 from ftplib import  FTP
-
+from configparser import  ConfigParser
 
 #TODO:     # Check for size compute failure in connect method line 20
-#TODO:    #port configurable
 #TODO: handle timeout
 #TODO : Remove commented Code
 
@@ -15,6 +14,18 @@ class FTPDownloader(BaseDownloader):
         self.ftpconnector = FTP()
         self.remotepath = None
 
+
+    def set_port_from_config(self):
+        try:
+            if self.configparser:
+                ports = self.configparser['ports']
+                port = ports.get(self.protocol, 0)
+                self.port = int(port)
+            else:
+                self.port = 0
+        except:
+            self.port = 0 # default set to continue process
+
     def connect(self):
 
         try:
@@ -22,8 +33,12 @@ class FTPDownloader(BaseDownloader):
             #Establish Connection
             host = self.parsed_url.hostname
             port = self.parsed_url.port
+
             if port is None:
-                port =0
+                self.set_port_from_config()
+                port = self.port
+
+
             username = self.parsed_url.username
             password = self.parsed_url.password
             self.ftpconnector.connect(host= host, port= port)
@@ -63,11 +78,10 @@ class FTPDownloader(BaseDownloader):
         finally:
             self.delete_file()
 
-    def download_resource(self, resourceidx):
+    def download_resource(self, resourceidx, config_path ='Config/config.ini'):
         try:
-            super().download_resource(resourceidx)
+            super().download_resource(resourceidx, config_path)
             self.connect()
-
             with open(self.path_downloaded_file, 'wb') as f:
                 def download_chunk(chunk):
                     self.size_of_file_downloaded += f.write(chunk)

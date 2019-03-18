@@ -1,7 +1,7 @@
 from threading import  Thread
 from queue import  Queue,Empty
 from resourcedownloader.processor.resource import Resource
-
+import  os
 
 #TODO:     #attempt delete after exception Line 63
 #TODO:     ##Exception format line 56
@@ -11,13 +11,14 @@ from resourcedownloader.processor.resource import Resource
 class DownloadProcessor(Thread):
     
     #def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload, runningdownloads, results):
-    def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload):
+    def __init__(self, threadidx, jobqueue, failedqueue, resources, pathtodownload, config_path ='Config/config.ini'):
         Thread.__init__(self)
         self.threadtempid = str(threadidx)
         self.jobqueue = jobqueue
         self.failedqueue = failedqueue
         self.resources= resources
         self.pathtodownload = pathtodownload
+        self.configpath =  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
         #self.runnningdownloads = runningdownloads
         #self.results = results
 
@@ -45,7 +46,7 @@ class DownloadProcessor(Thread):
                 file_idx = self.threadtempid + '_'+ str(resourceidx)
                 statusval = 'Calling Download Method of Downloader :'
                 curr_resource.update_status(statusval)                
-                curr_resource.protocol_downloader.download_resource(file_idx)
+                curr_resource.protocol_downloader.download_resource(file_idx, self.configpath)
                 curr_resource.set_downloadfilepath(curr_resource.protocol_downloader.get_download_path())
                 #self.results['Completed'].append(resourceidx)
                 #self.runnningdownloads.remove(resourceidx)

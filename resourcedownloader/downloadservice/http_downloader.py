@@ -16,6 +16,7 @@ class HTTPDownloader(BaseDownloader):
 
     def connect(self):
         try:
+
             self.response = requests.get(self.resourceurl, stream=True, timeout=60)
             self.response.raise_for_status()
             self.size_of_file_to_download = int(self.response.headers.get('content-length', ))
@@ -45,9 +46,9 @@ class HTTPDownloader(BaseDownloader):
         finally:
             self.delete_file()
 
-    def download_resource(self, resourceidx):
+    def download_resource(self, resourceidx, config_path ='Config/config.ini'):
         try:
-            super().download_resource(resourceidx)
+            super().download_resource(resourceidx, config_path)
             self.connect()
             with open(self.path_downloaded_file, 'wb') as f:
                     for current_chunk in self.response.iter_content(chunk_size = self.chunksize):

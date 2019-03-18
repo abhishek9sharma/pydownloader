@@ -2,8 +2,8 @@ from abc import abstractmethod, ABC
 import  os, errno
 from  urllib.parse import urlparse
 from datetime import  datetime
+from configparser import  ConfigParser
 
-#TODO: Conifgurable alphanumeric array/ timestmapmformat
 #TODO : Remove commented Code
 
 class BaseDownloader(ABC):
@@ -19,10 +19,40 @@ class BaseDownloader(ABC):
         self.size_of_file_to_download = None
         self.size_of_file_downloaded = 0
         self.chunksize = 1024
+        self.port = 0
         self.delete_successful = False
         self.connectionactive = False
+        self.configparser = None
+
         # self.chunkunit = 'b'
         # self.downloadprogress = None
+
+
+    def set_config(self, config_path):
+        try:
+            config_parser = ConfigParser()
+            config_path= os.path.join(os.path.dirname(config_path), os.path.basename(config_path))
+            data = config_parser.read(config_path)
+            if len(data)==0:
+                raise ValueError(' Could not load data from configuration ' )
+            else:
+                self.configparser = config_parser
+                self.set_chunksize()
+        except:
+            # Did not raise error here so as to proceed with default configs
+            self.configparser = None
+
+
+    def set_chunksize(self):
+        try:
+            if self.configparser:
+                chunksizes = self.configparser['chunksizes']
+                chunksize = chunksizes.get(self.protocol, 1024)
+                self.chunksize = int(chunksize)
+            else:
+                self.chunksize = 1024
+        except:
+            self.chunksize = 1024 # default set to continue process
 
     def set_org_file_name(self):
         try:
@@ -33,7 +63,7 @@ class BaseDownloader(ABC):
     def get_download_path(self):
         return self.path_downloaded_file
 
-    def get_cuurtime_str(self):
+    def get_currtime_str(self):
         timestampformat = '%Y%m%d__%H%M%S'
         currtime_str = str(datetime.now().strftime(timestampformat))
         return  currtime_str
@@ -45,7 +75,7 @@ class BaseDownloader(ABC):
             #for char in hostnamechars:
             #    netloc = netloc.replace(char,'_')
             #self.downloaded_file_name = resourceidx +'_' + self.get_cuurtime_str() + '_'+ self.protocol + '_' + netloc+ '_'+ self.org_file_name
-            self.downloaded_file_name = resourceidx + '_' +self.protocol +'_' + self.get_cuurtime_str() + '_' + self.org_file_name
+            self.downloaded_file_name = resourceidx + '_' +self.protocol +'_' + self.get_currtime_str() + '_' + self.org_file_name
 
             self.path_downloaded_file = os.path.join(self.path_download_dir, self.downloaded_file_name)
             if self.path_downloaded_file is None:
@@ -53,8 +83,9 @@ class BaseDownloader(ABC):
         except Exception as e:
             raise
 
-    def download_resource(self, resourceidx):
+    def download_resource(self, resourceidx, config_path ='Config/config.ini'):
         try:
+            self.set_config(config_path)
             self.set_download_file_path(resourceidx)
         except:
             raise

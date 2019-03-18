@@ -4,7 +4,6 @@ import  os
 
 
 #TODO:     # Check for size compute failure in connect method line 20
-#TODO:     #port configurable
 #TODO: handle timeout
 #TODO : Remove commented Code
 
@@ -25,8 +24,11 @@ class SFTPDownloader(BaseDownloader):
             # Establish Connection
             host = self.parsed_url.hostname
             port = self.parsed_url.port
+            #port = None
+
             if port is None:
-                port = 22
+                self.set_port_from_config()
+                port = self.port
             username = self.parsed_url.username
             password = self.parsed_url.password
             self.sftpconnector = self.pysftpref.Connection(host, username = username, password = password, port = port)
@@ -66,9 +68,21 @@ class SFTPDownloader(BaseDownloader):
         finally:
             self.delete_file()
 
-    def download_resource(self, resourceidx):
+    def set_port_from_config(self):
         try:
-            super().download_resource(resourceidx)
+            if self.configparser:
+                ports = self.configparser['ports']
+                port = ports.get(self.protocol, 22)
+                self.port = int(port)
+            else:
+                self.port = 22
+        except:
+            self.port = 22 # default set to continue process
+
+
+    def download_resource(self, resourceidx, config_path ='Config/config.ini'):
+        try:
+            super().download_resource(resourceidx, config_path)
             self.connect()
 
             def update_progress(bytestransferred, bytesleft):

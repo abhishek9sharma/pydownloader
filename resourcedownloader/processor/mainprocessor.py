@@ -8,12 +8,11 @@ import  os
 import  errno
 import  time
 from tqdm import  tqdm
-
+from configparser import  ConfigParser
 
 #TODO:     # Q used Needs to B Tested # Network error such as wifi Temp Dir and Cleanup a possible way
 #TODO:     # Write a Log Somewhere
 #TODO:     # errors for 0 inputs
-#TODO:     # No of threads configurable
 #TODO :     #remove commented code
 #TODO:     #Detailed Logging at each faiure
 #TODO:     # Main Process tqdm bar
@@ -21,9 +20,11 @@ from tqdm import  tqdm
 
 class DownloadsProcessor:
 
-    def __init__(self, resourceurlslist, path_download_dir):
+    def __init__(self, resourceurlslist, path_download_dir, config_path ='Config/config.ini'):
         self.resourceurls = resourceurlslist
         self.path_download_dir = os.path.join(path_download_dir)
+        self.configpath = os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+        self.configparser = None
         
         if len(self.resourceurls)==0:
             print( " No urls specified. Please provide resource links need to be downloade")
@@ -38,12 +39,10 @@ class DownloadsProcessor:
         #self.results = {'Failed' : [] ,'Completed': [], 'Unresolved':[] }
         #self.runnningdownloads = []
         self.resources = {}
-
-        
         self.mainprocessprogress = None
 
         for idx,resourceurl in enumerate(self.resourceurls):
-            resourceobj = Resource(idx, resourceurl)
+            resourceobj = Resource(idx, resourceurl, config_path)
             if resourceobj.protocolresolved:
                 statusvalue = "Resolved Protocol Ready for Download"
                 self.jobqueue.put(idx)
@@ -57,6 +56,32 @@ class DownloadsProcessor:
             self.resources[idx] = resourceobj      
        
         self.threadsize = 2
+
+    def load_config(self):
+        try:
+            self.configparser = ConfigParser()
+            configdata =self.configparser.read(self.configpath)
+            if configdata and len(configdata)>0:
+                pass
+            else:
+                self.configparser = None
+        except:
+            self.configparser = None
+
+
+    def set_no_of_threads(self):
+        try:
+            if self.configparser:
+                thread_config = self.configparser['threading']
+                threadsize = thread_config.get('noofthreads', 2)
+                self.threadsize = int(threadsize)
+            else:
+                self.threadsize = 2
+        except:
+            self.threadsize = 2 # set to default so as to keep the process runnning
+
+
+
 
     def check_failed_downloads_deletion(self):
         #check if fetch from Queue thr resource idx
@@ -132,19 +157,23 @@ class DownloadsProcessor:
 
     def process_resources(self):
         try:
+            self.load_config()
+            if self.configparser:
+                self.set_no_of_threads()
+
             #Start Monitor
             progress_monitor = Thread(target=self.monitor_progress)
             progress_monitor.start()
 
             # Start Downloads
-            if self.threadsize>len(self.resourceurls):
+            if self.threadsize > len(self.resourceurls):
                 noofthreads = len(self.resourceurls)
             else:
                 noofthreads = self.threadsize
 
             for threadidx in range(noofthreads):
                 #jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir,self.runnningdownloads, self.results)
-                jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir)
+                jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir, self.configpath)
                 jobprocessor.start()
 
             self.jobqueue.join()
