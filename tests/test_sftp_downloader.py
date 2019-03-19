@@ -13,7 +13,8 @@ class TestSFTPDownloader(object):
 
     @classmethod
     def setup_class(self):
-        self.url = 'sftp://demo:password@test.rebex.net:22/readme.txt'
+        self.url = 'sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/manual_en.pdf'
+        #the link may  need to be updated in future running as of 20032019
 
     @classmethod
     def teardown_class(self):
