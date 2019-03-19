@@ -1,28 +1,27 @@
 # import  sys
 # print(sys.path)
-from resourcedownloader.processor.downloadprocessor import  DownloadProcessor
+from resourcedownloader.processor.downloadprocessor import DownloadProcessor
 from resourcedownloader.processor.resource import Resource
-from queue import Queue,Empty
-from threading import  Thread, Semaphore
-import  os
-import  errno
-import  time
-from tqdm import  tqdm
-from configparser import  ConfigParser
-from pathlib import  Path
+from queue import Queue, Empty
+from threading import Thread, Semaphore
+import os
+import errno
+import time
+from tqdm import tqdm
+from configparser import ConfigParser
+from pathlib import Path
 import sys
 import logging
-from  datetime import  datetime
+from datetime import datetime
 from resourcedownloader.utils.utilfunctions import *
 
 
-#TODO:     # Main Progress Bar or Alternative Code Up
-
+# TODO:     # Main Progress Bar or Alternative Code Up
 
 
 class DownloadsProcessor:
 
-    def __init__(self, resourceurlslist, path_download_dir, config_path = None):
+    def __init__(self, resourceurlslist, path_download_dir, config_path=None):
 
         """ Constructor for creating a list of resources which need to be downloaded """
 
@@ -36,22 +35,20 @@ class DownloadsProcessor:
         self.path_download_dir = os.path.join(path_download_dir)
         self.config_path = set_config_path(config_path)
         self.configparser = None
-        self.logger  = set_logger('_main_joblog.log')
+        self.logger = set_logger('_main_joblog.log')
         self.progress_info_mode = 2
-
-
 
         self.jobqueue = Queue()
         self.failedqueue = Queue()
-        self.resources ={}
+        self.resources = {}
         self.mainprocessprogress = None
 
-        for idx,resourceurl in enumerate(self.resourceurls):
+        for idx, resourceurl in enumerate(self.resourceurls):
             resourceobj = Resource(idx, resourceurl, config_path)
             if resourceobj.protocolresolved:
                 statusvalue = "Resolved Protocol Ready for Download"
                 self.jobqueue.put(idx)
-                resourceobj.update_status(statusvalue)    
+                resourceobj.update_status(statusvalue)
             else:
                 statusvalue = "Protocol could not be resolved no further processing"
                 resourceobj.update_status(statusvalue)
@@ -60,20 +57,19 @@ class DownloadsProcessor:
                                      resourceobj.exceptions_if_failed])
                 self.logger.info(loginfo + excpinfo)
 
-                           
-            self.resources[idx] = resourceobj      
-       
+            self.resources[idx] = resourceobj
+
         self.threadsize = 2
         self.logger.info("resource objects initiated")
 
     def load_config(self):
-        
+
         """ Tries to load configuration based on the config path """
 
         try:
             self.configparser = ConfigParser()
-            configdata =self.configparser.read(self.config_path)
-            if configdata and len(configdata)>0:
+            configdata = self.configparser.read(self.config_path)
+            if configdata and len(configdata) > 0:
                 pass
             else:
                 self.configparser = None
@@ -81,9 +77,9 @@ class DownloadsProcessor:
             self.configparser = None
 
     def set_no_of_threads(self):
-        
+
         """ Tries to set number of threads based on configuration passed or sets them to default values """
-        
+
         try:
             if self.configparser:
                 thread_config = self.configparser['threading']
@@ -92,7 +88,7 @@ class DownloadsProcessor:
             else:
                 self.threadsize = 2
         except:
-            self.threadsize = 2 # set to default so as to keep the process runnning
+            self.threadsize = 2  # set to default so as to keep the process runnning
 
     def check_failed_downloads_deletion(self):
 
@@ -120,8 +116,8 @@ class DownloadsProcessor:
             if resourceobj.protocol_downloader:
                 try:
                     currdownloader = resourceobj.protocol_downloader
-                    delete_failed = not(currdownloader.delete_successful)
-                    
+                    delete_failed = not (currdownloader.delete_successful)
+
                     if delete_failed and currdownloader.connectionactive:
                         currdownloader.abort_download()
                     elif delete_failed:
@@ -131,48 +127,48 @@ class DownloadsProcessor:
                     else:
                         pass
                 except:
-                     os.remove(resourceobj.downloadfilepath) 
+                    os.remove(resourceobj.downloadfilepath)
             else:
-                os.remove(resourceobj.downloadfilepath) 
+                os.remove(resourceobj.downloadfilepath)
         except OSError as osexcp:
-                if osexcp.errno == errno.ENOENT:
-                    pass
+            if osexcp.errno == errno.ENOENT:
+                pass
         except:
-           raise
-    
+            raise
+
     def plot_progress_total(self):
 
         """Plots the progress about how many jobs processed in tqdm format """
 
         if self.mainprocessprogress is None:
             desc = " Jobs Completed "
-            self.mainprocessprogress = tqdm(desc=desc, total=len(self.resources), disable= False)
-        
-        if self.mainprocessprogress.n==len(self.resources):
+            self.mainprocessprogress = tqdm(desc=desc, total=len(self.resources), disable=False)
+
+        if self.mainprocessprogress.n == len(self.resources):
             pass
         else:
             progress = len(self.resources) - self.jobqueue.unfinished_tasks - self.mainprocessprogress.n
-            self.mainprocessprogress.update(progress)             
+            self.mainprocessprogress.update(progress)
 
     def plot_progress_individual(self):
 
         """Plots the progress of individual jobs processed in tqdm format """
 
         lock = Semaphore(value=1)
-        lock.acquire() 
-        for k,resourceobj in self.resources.items():                          
-            resourceobj.plot_progress()     
-        #time.sleep(0.1)           
+        lock.acquire()
+        for k, resourceobj in self.resources.items():
+            resourceobj.plot_progress()
+            # time.sleep(0.1)
         lock.release()
 
     def monitor_progress(self):
-        
+
         """Monitors the progress of Resources waiting download in queue and also clears downloads in failed queue"""
-        
+
         try:
 
             while True:
-                if self.progress_info_mode ==1:
+                if self.progress_info_mode == 1:
 
                     # This needs to be finalized    
                     total = len(self.resources)
@@ -185,8 +181,8 @@ class DownloadsProcessor:
                 else:
                     self.plot_progress_individual()
 
-                    #Track Main Processor
-                    #lock = Semaphore(value=1)
+                    # Track Main Processor
+                    # lock = Semaphore(value=1)
                     # lock.acquire()
                     # self.plot_progress_total()
                     # time.sleep(1)
@@ -198,12 +194,12 @@ class DownloadsProcessor:
                         print(opstring)
                     else:
                         self.plot_progress_individual()
-                        #time.sleep(5)
+                        # time.sleep(5)
                         self.failedqueue.join()
-                    break              
+                    break
                 self.check_failed_downloads_deletion()
-                #self.logger.info(" Completed a round of failed downloads removal inside monitor")
-                                            
+                # self.logger.info(" Completed a round of failed downloads removal inside monitor")
+
             self.check_failed_downloads_deletion()
             self.logger.info(" Completed final  round of failed downloads removal inside monitor")
         except:
@@ -212,7 +208,7 @@ class DownloadsProcessor:
             raise
 
     def download_resources(self):
-        
+
         """ Creates threads for downloading resource files based on resource objects """
 
         try:
@@ -221,8 +217,7 @@ class DownloadsProcessor:
             if self.configparser:
                 self.set_no_of_threads()
 
-
-            #Start Monitor
+            # Start Monitor
             progress_monitor = Thread(target=self.monitor_progress)
             progress_monitor.start()
             self.logger.info(" Monitoring Thread Initiated ")
@@ -234,7 +229,8 @@ class DownloadsProcessor:
                 noofthreads = self.threadsize
 
             for threadidx in range(noofthreads):
-                jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir, self.config_path)
+                jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources,
+                                                 self.path_download_dir, self.config_path)
                 jobprocessor.start()
 
             self.logger.info(" Job Proceesing Threads Initiated ")
@@ -242,14 +238,13 @@ class DownloadsProcessor:
             self.jobqueue.join()
             self.logger.info(" Trying to Closing  Job Proceesing Threads ")
 
-
             self.failedqueue.join()
             self.logger.info(" Completed round of failed downloads removal after job thread closing")
 
             progress_monitor.join()
             self.logger.info(" Trying to Closing  Monitor Threads ")
-            #time.sleep(20)
-            #print(' Finished Processing Jobs')
+            # time.sleep(20)
+            # print(' Finished Processing Jobs')
         except:
             self.check_failed_downloads_deletion()
             self.logger.info(" Completed round failed downloads removal inside download module exception")
@@ -258,8 +253,6 @@ class DownloadsProcessor:
             # progress_monitor.join()
             self.check_failed_downloads_deletion()
             self.logger.info(" Completed last round of failed downloads removal ")
-            #time.sleep(10)
+            # time.sleep(10)
             print(" Completed current iteration for Processing (Downloading) Resources")
             self.logger.info(" Completed current iteration for Processing (Downloading) Resources")
-
-

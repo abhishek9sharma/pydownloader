@@ -70,7 +70,7 @@ class TestHTTPDownloader(object):
         assert os.path.exists(http_downloader.path_downloaded_file)
         assert open(http_downloader.path_downloaded_file).read() == b'\x00\x00\x00\x00\x00\x00\x00\x00'.decode('utf-8')
 
-    def test_download_http_file_failure(self, tmpdir, monkeypatch):
+    def test_download_http_file_failure(self, tmpdir):
         url = 'http://localhost:{port}/failureCase.txt'.format(port=self.port)
         http_downloader = HTTPDownloader(url, str(tmpdir))
         with pytest.raises(requests.exceptions.HTTPError):

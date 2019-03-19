@@ -1,23 +1,22 @@
 from resourcedownloader.downloadservice.resource_downloader import BaseDownloader
 import pysftp
-import  os
+import os
 
-import  logging
+import logging
+
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 
-
 class SFTPDownloader(BaseDownloader):
-    
-    def __init__(self, resourceurl, path_download_dir, config_path = None):
+
+    def __init__(self, resourceurl, path_download_dir, config_path=None):
 
         """ Returns downloader object for SFTP resoucrce """
 
-        super().__init__(resourceurl, path_download_dir,  config_path)
+        super().__init__(resourceurl, path_download_dir, config_path)
         self.pysftpref = pysftp
         self.sftpconnector = None
         self.remotepath = None
-
 
     def connect(self):
 
@@ -27,29 +26,30 @@ class SFTPDownloader(BaseDownloader):
             # Establish Connection
             host = self.parsed_url.hostname
             port = self.parsed_url.port
-  
+
             if port is None:
                 self.set_port_from_config()
                 port = self.port
             username = self.parsed_url.username
             password = self.parsed_url.password
-                       
-            self.sftpconnector = self.pysftpref.Connection(host, username = username, password = password, port = port)
+
+            self.sftpconnector = self.pysftpref.Connection(host, username=username, password=password, port=port)
             self.sftpconnector.timeout = self.timeout
-            
+
             # Compute size of file
             self.remotepath = self.org_file_name
             if self.remotedir:
                 self.sftpconnector.cwd(self.remotedir)
-                self.remotepath = os.path.join(self.remotedir , self.remotepath)
+                self.remotepath = os.path.join(self.remotedir, self.remotepath)
             self.connectionactive = True
-            
-            
+
             # raise exception if file size cannot be determined as unreliable download
             self.size_of_file_to_download = self.sftpconnector.stat(self.remotepath).st_size
-            
+
             if self.size_of_file_to_download == 0:
-                raise Exception( " Aborting, as not able to determine length of the content to be downloaded for url {0}", self.resourceurl)
+                raise Exception(
+                    " Aborting, as not able to determine length of the content to be downloaded for url {0}",
+                    self.resourceurl)
 
         except:
             raise
@@ -65,7 +65,7 @@ class SFTPDownloader(BaseDownloader):
             raise
 
     def abortdownload(self):
-        
+
         """ This method tries to stop any active SFTP connections created and delete the  downloaded SFTP resource """
 
         try:
@@ -77,7 +77,7 @@ class SFTPDownloader(BaseDownloader):
 
     def set_port_from_config(self):
 
-        """ Sets the default port to be used for downloading SFTP file """    
+        """ Sets the default port to be used for downloading SFTP file """
 
         try:
             if self.configparser:
@@ -87,9 +87,8 @@ class SFTPDownloader(BaseDownloader):
             else:
                 self.port = 22
         except:
-            self.port = 22 
+            self.port = 22
             # default set to continue process
-
 
     def download_resource(self, resourceidx):
 
@@ -110,15 +109,10 @@ class SFTPDownloader(BaseDownloader):
             try:
                 self.disconnect()
             except:
-                if self.size_of_file_to_download==self.size_of_file_downloaded:
+                if self.size_of_file_to_download == self.size_of_file_downloaded:
                     pass
                 else:
                     raise
         except:
             self.abortdownload()
             raise
-
-    
-
-
-

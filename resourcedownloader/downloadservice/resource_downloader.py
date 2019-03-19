@@ -1,15 +1,15 @@
 from abc import abstractmethod, ABC
-import  os, errno
-from  urllib.parse import urlparse
-from datetime import  datetime
-from configparser import  ConfigParser
+import os, errno
+from urllib.parse import urlparse
+from datetime import datetime
+from configparser import ConfigParser
 from pathlib import Path
 from resourcedownloader.utils.utilfunctions import *
 
 
 class BaseDownloader(ABC):
 
-    def __init__(self, resourceurl, path_download_dir, config_path = None):
+    def __init__(self, resourceurl, path_download_dir, config_path=None):
 
         """ Sets properties for object of any subclass of  BaseDownloader """
 
@@ -30,7 +30,6 @@ class BaseDownloader(ABC):
         self.configparser = None
         self.timeout = 100
 
-        
     def set_config(self):
 
         """ Tries to load configuration based on the config path """
@@ -41,8 +40,8 @@ class BaseDownloader(ABC):
             if config_path is None:
                 raise ValueError(' config file is not set ')
             data = config_parser.read(config_path)
-            if len(data)==0:
-                raise ValueError(' Could not load configuration data ' )
+            if len(data) == 0:
+                raise ValueError(' Could not load configuration data ')
             else:
                 self.configparser = config_parser
                 self.set_chunksize()
@@ -54,7 +53,7 @@ class BaseDownloader(ABC):
     def set_timeout(self):
 
         """ Tries to set some set timeout values based on configuration passed or sets them to default values """
-        
+
         try:
             if self.configparser:
                 timeouts = self.configparser['timeouts']
@@ -63,12 +62,12 @@ class BaseDownloader(ABC):
             else:
                 self.timeout = 100
         except:
-            self.timeout = 100 # default set to continue process
+            self.timeout = 100  # default set to continue process
 
     def set_chunksize(self):
 
         """ Tries to set some set chunksize values based on configuration passed or sets them to default values """
-        
+
         try:
             if self.configparser:
                 chunksizes = self.configparser['chunksizes']
@@ -77,26 +76,26 @@ class BaseDownloader(ABC):
             else:
                 self.chunksize = 1024
         except:
-            self.chunksize = 1024 # default set to continue process
+            self.chunksize = 1024  # default set to continue process
 
     def set_org_file_name(self):
 
         """ Sets the name of actual file to be fetched  based on the url resource passed """
-        
+
         try:
             return os.path.basename(self.parsed_url.path)
         except:
             raise ValueError("Could not find remote file name for resource {0}", self.resourceurl)
-  
+
     def get_download_path(self):
 
         """ gets the value of the path where the file be downloaded to """
-        
+
         return self.path_downloaded_file
 
     def set_download_file_path(self, resourceidx):
         try:
-            self.downloaded_file_name = resourceidx + '_' +self.protocol +'_' + get_currtime_str() + '_' + self.org_file_name
+            self.downloaded_file_name = resourceidx + '_' + self.protocol + '_' + get_currtime_str() + '_' + self.org_file_name
 
             self.path_downloaded_file = os.path.join(self.path_download_dir, self.downloaded_file_name)
             if self.path_downloaded_file is None:
@@ -129,19 +128,16 @@ class BaseDownloader(ABC):
                     self.delete_successful = True
                 else:
                     raise
-    
+
     def get_download_progress(self):
 
         """ Gets the progress of how much of the resource has been downloaded """
         try:
             description = self.downloaded_file_name
-            curr_percentage_progress =0
-            if self.size_of_file_downloaded and self.size_of_file_to_download and self.size_of_file_to_download!=0:
-                curr_percentage_progress= int(100 * float(self.size_of_file_downloaded / self.size_of_file_to_download))
+            curr_percentage_progress = 0
+            if self.size_of_file_downloaded and self.size_of_file_to_download and self.size_of_file_to_download != 0:
+                curr_percentage_progress = int(
+                    100 * float(self.size_of_file_downloaded / self.size_of_file_to_download))
             return description, self.size_of_file_downloaded, self.size_of_file_to_download, curr_percentage_progress
         except:
             return self.downloaded_file_name, 0, 0, 0
-
-
-
-

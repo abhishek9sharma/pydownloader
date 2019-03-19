@@ -1,25 +1,24 @@
-from  urllib.parse import urlparse
+from urllib.parse import urlparse
 from configparser import ConfigParser
-from resourcedownloader.downloadservice.ftp_downloader import  FTPDownloader
-from resourcedownloader.downloadservice.sftp_downloader import  SFTPDownloader
-from resourcedownloader.downloadservice.http_downloader import  HTTPDownloader
-import  os
+from resourcedownloader.downloadservice.ftp_downloader import FTPDownloader
+from resourcedownloader.downloadservice.sftp_downloader import SFTPDownloader
+from resourcedownloader.downloadservice.http_downloader import HTTPDownloader
+import os
 from pathlib import Path
 from resourcedownloader.utils.utilfunctions import *
 
 
 class DownloadProtocolFactory(object):
 
-
     @staticmethod
-    def get_protocol(url, config_path = None):
+    def get_protocol(url, config_path=None):
 
         """
         This method identifies the protocol associated with the url.
         Returns the class whose object should be initiated to download the url.
         Raises error if the protoco is not yet supported
         """
-        
+
         try:
             parsed_url = urlparse(url)
             protocol = parsed_url.scheme
@@ -35,9 +34,9 @@ class DownloadProtocolFactory(object):
             try:
                 protocol_config_parser = ConfigParser()
                 protocol_config_parser.read(config_path)
-                protocol_dict = {k:v for k,v in protocol_config_parser.items('protocol_selector')}
+                protocol_dict = {k: v for k, v in protocol_config_parser.items('protocol_selector')}
                 if protocol in protocol_dict:
-                     return eval(protocol_dict[protocol])
+                    return eval(protocol_dict[protocol])
                 else:
                     raise NotImplementedError('the network protocol {0} is not supported yet'.format(protocol))
             except:
