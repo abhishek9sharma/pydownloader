@@ -1,4 +1,4 @@
-#Description
+# Description
 A package (set of scripts) to download files using various network protocols.
 
 ## Steps to run
@@ -49,9 +49,10 @@ A package (set of scripts) to download files using various network protocols.
 		where destfolderpath is the path of destination folder where files are to be downloaded 
 
 7. The execution trace logs are generated in the Folder below
-    -- *pydownloader/resourcedownloader/Logs* 
+        
+        -- pydownloader/resourcedownloader/Logs 
 
-8. In order to run TestCases run the following command from command prompt
+8. In order to execute the testcases run the following command from command prompt
     
         -- Windows  : pytest
         -- Linux    : pytest
