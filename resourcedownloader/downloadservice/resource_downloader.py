@@ -6,7 +6,6 @@ from configparser import  ConfigParser
 from pathlib import Path
 from resourcedownloader.utils.utilfunctions import *
 
-#TODO : Remove Commented Code w.r.t Utils
 
 class BaseDownloader(ABC):
 
@@ -27,22 +26,10 @@ class BaseDownloader(ABC):
         self.port = 0
         self.delete_successful = False
         self.connectionactive = False
-        #self.config_path = self.set_config_path(config_path)
         self.config_path = set_config_path(config_path)
         self.configparser = None
         self.timeout = 100
 
-    # def set_config_path(self, config_path):
-
-    #     """ Tries to set the config path from provided value or default config path """
-
-    #     try:
-    #         if config_path is None:
-    #             return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
-    #         else:
-    #             return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
-    #     except:
-    #         return  None
         
     def set_config(self):
 
@@ -107,21 +94,8 @@ class BaseDownloader(ABC):
         
         return self.path_downloaded_file
 
-    # def get_currtime_str(self):
-
-    #     """ Gets the current time in a particular format  """
-
-    #     timestampformat = '%Y%m%d__%H%M%S'
-    #     currtime_str = str(datetime.now().strftime(timestampformat))
-    #     return  currtime_str
-
     def set_download_file_path(self, resourceidx):
         try:
-            #hostnamechars =['.',':','@']# Load from Config pleas
-            #netloc = self.parsed_url.netloc
-            #for char in hostnamechars:
-            #    netloc = netloc.replace(char,'_')
-            #self.downloaded_file_name = resourceidx +'_' + self.get_cuurtime_str() + '_'+ self.protocol + '_' + netloc+ '_'+ self.org_file_name
             self.downloaded_file_name = resourceidx + '_' +self.protocol +'_' + get_currtime_str() + '_' + self.org_file_name
 
             self.path_downloaded_file = os.path.join(self.path_download_dir, self.downloaded_file_name)
