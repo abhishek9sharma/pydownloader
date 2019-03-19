@@ -2,6 +2,7 @@ from  resourcedownloader.downloadservice.download_factory import DownloadProtoco
 from tqdm import  tqdm
 import os
 from pathlib import Path
+from resourcedownloader.utils.utilfunctions import *
 
 #TODO: Remove Code from PlotProgress
 #TODO : Remove commented Code
@@ -12,7 +13,8 @@ class Resource:
         """construtor for url that needs to be downloaded"""
         self.resourceidx = idx
         self.resourceurl = resourceurl
-        self.config_path = self.set_config_path(config_path)
+        #self.config_path = self.set_config_path(config_path)
+        self.config_path = set_config_path(config_path)
         self.exceptions_if_failed = []
         try:
             self.protocolclass = DownloadProtocolFactory.get_protocol(self.resourceurl, self.config_path)
@@ -39,14 +41,14 @@ class Resource:
             newstatus = currstatus + ':' + str(statusvalue).replace(':','')
             self.set_status(newstatus)
 
-    def set_config_path(self, config_path):
-        try:
-            if config_path is None:
-                return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
-            else:
-                return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
-        except:
-            return  None
+    # def set_config_path(self, config_path):
+    #     try:
+    #         if config_path is None:
+    #             return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
+    #         else:
+    #             return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+    #     except:
+    #         return  None
     
     def get_status(self):
         return self.status

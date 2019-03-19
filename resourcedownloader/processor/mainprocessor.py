@@ -13,7 +13,7 @@ from pathlib import  Path
 import sys
 import logging
 from  datetime import  datetime
-
+from resourcedownloader.utils.utilfunctions import *
 
 
 #TODO:     # Main Progress Bar
@@ -33,9 +33,11 @@ class DownloadsProcessor:
 
         self.resourceurls = resourceurlslist
         self.path_download_dir = os.path.join(path_download_dir)
-        self.config_path = self.set_config_path(config_path)
+        #self.config_path = self.set_config_path(config_path)
+        self.config_path = set_config_path(config_path)
         self.configparser = None
-        self.logger = self.set_logger()
+        #self.logger = self.set_logger('_main_joblog.log', 'Logs')
+        self.logger  = set_logger('_main_joblog.log')
         self.progress_info_mode = 1
 
 
@@ -67,16 +69,22 @@ class DownloadsProcessor:
         self.threadsize = 2
         self.logger.info("resource objects initiated")
 
-    def set_config_path(self, config_path):
-        try:
-            if config_path is None:
-                return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
-            else:
-                return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
-        except:
-            return  None
+    # def set_config_path(self, config_path):
+
+    #    """ Tries to set the config path from provided value or default config path """
+
+    #     try:
+    #         if config_path is None:
+    #             return os.path.join(str(Path(__file__).parents[1]),'config','config.ini')
+    #         else:
+    #             return  os.path.join(os.path.dirname(config_path) , os.path.basename(config_path))
+    #     except:
+    #         return  None
 
     def load_config(self):
+        
+        """ Tries to load configuration based on the config path """
+
         try:
             self.configparser = ConfigParser()
             configdata =self.configparser.read(self.config_path)
@@ -99,26 +107,26 @@ class DownloadsProcessor:
         except:
             self.threadsize = 2 # set to default so as to keep the process runnning
 
-    def get_currtime_str(self):
-        timestampformat = '%Y%m%d__%H%M%S'
-        currtime_str = str(datetime.now().strftime(timestampformat))
-        return  currtime_str
+    # def get_currtime_str(self):
+    #     timestampformat = '%Y%m%d__%H%M%S'
+    #     currtime_str = str(datetime.now().strftime(timestampformat))
+    #     return  currtime_str
 
-    def set_logger(self):
-        uniqfilename = os.path.join(str(Path(__file__).parents[1]),'Logs', self.get_currtime_str()+ '_main_joblog.log')
-        #uniqfilename = str(self.get_currtime_str()+ '_'+ self.threadtempid +'_' + 'joblog.log')
+    # def set_logger(self, identifier, logfolder):
+    #     uniqfilename = os.path.join(str(Path(__file__).parents[1]), logfolder, self.get_currtime_str())
+    #     #uniqfilename = str(self.get_currtime_str()+ '_'+ self.threadtempid +'_' + 'joblog.log')
 
-        logger = logging.getLogger(str(uniqfilename))
-        logger.setLevel(logging.INFO)
-        logfilepath = uniqfilename
+    #     logger = logging.getLogger(str(uniqfilename))
+    #     logger.setLevel(logging.INFO)
+    #     logfilepath = uniqfilename
 
-        handler = logging.FileHandler(logfilepath)
-        logformat = logging.Formatter('%(asctime)s:%(message)s')
-        handler.setFormatter(logformat)
-        logger.propagate = False
-        logger.addHandler(handler)
+    #     handler = logging.FileHandler(logfilepath)
+    #     logformat = logging.Formatter('%(asctime)s:%(message)s')
+    #     handler.setFormatter(logformat)
+    #     logger.propagate = False
+    #     logger.addHandler(handler)
 
-        return  logger
+    #     return  logger
 
 
     def check_failed_downloads_deletion(self):
