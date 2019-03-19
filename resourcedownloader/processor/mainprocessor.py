@@ -11,13 +11,13 @@ from tqdm import  tqdm
 from configparser import  ConfigParser
 from pathlib import  Path
 
-
+#TODO:     # Progress Buggy on Inside Virtual Env
 #TODO:     # check SFTP Console Exception
 #TODO:     # Write a Log Somewhere
 #TODO:     # errors for 0 inputs/Packaging
 #TODO:     #Detailed Logging at each faiure
 #TODO :     #remove commented code
-#TODO:     # Main Process Check if to keep or remove
+
 #TODO :    #Temp Dir and Cleanup a possible way
 
 

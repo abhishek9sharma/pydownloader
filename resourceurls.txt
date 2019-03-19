@@ -1,0 +1,3 @@
+ftp://speedtest:speedtest@ftp.otenet.gr/test1Mb.db
+http://speedtest.ftp.otenet.gr/files/test1Mb.db
+sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/manual_en.pdf
