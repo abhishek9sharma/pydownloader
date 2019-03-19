@@ -28,8 +28,7 @@ class DownloadsProcessor:
         self.path_download_dir = os.path.join(path_download_dir)
         self.config_path = self.set_config_path(config_path)
         self.configparser = None
-        self.progress_info_mode = 2
-        
+        self.progress_info_mode = 1
 
         if len(self.resourceurls)==0:
             print( " No urls specified. Please provide resource links need to be downloade")
@@ -170,7 +169,7 @@ class DownloadsProcessor:
                     finished = total - left
                     #self.basic_progress_bar(finished,total, status='Progress')
                     #time.sleep(0.5)  # emulating long-playing job
-                    opstring = "Total Jobs: {0}  Jobs Left : {1}".format(total, left)
+                    opstring = "Total Jobs: {0}  Jobs Finished : {1} Jobs Left : {2}".format(total, finished, left)
                     sys.stdout.write(opstring + '\r')
                     sys.stdout.flush()
                     #print(
@@ -204,21 +203,17 @@ class DownloadsProcessor:
             self.check_failed_downloads_deletion()
             raise
 
-    def clear_screen(self):
-        if os.name=='nt':
-            os.system('cls')
-        else:
-            os.system('clear')
 
-    def basic_progress_bar(self,count, total, status=''):
-        bar_len = 60
-        filled_len = int(round(bar_len * count / float(total)))
 
-        percents = round(100.0 * count / float(total), 1)
-        bar = '=' * filled_len + '-' * (bar_len - filled_len)
-
-        sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
-        sys.stdout.flush() 
+    # def basic_progress_bar(self,count, total, status=''):
+    #     bar_len = 60
+    #     filled_len = int(round(bar_len * count / float(total)))
+    #
+    #     percents = round(100.0 * count / float(total), 1)
+    #     bar = '=' * filled_len + '-' * (bar_len - filled_len)
+    #
+    #     sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
+    #     sys.stdout.flush()
 
     def download_resources(self):
         try:

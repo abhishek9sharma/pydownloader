@@ -42,7 +42,7 @@ A set of scripts to download files using various protocols.
 6. From command prompt run the following command
     
         -- Windows : python run resourceurls.txt destfolderpath
-        -- Linux   : python run resourceurls.txt destfolderpath 
+        -- Linux   : python3 run resourceurls.txt destfolderpath 
 
 
 

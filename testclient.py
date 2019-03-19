@@ -14,9 +14,10 @@ urls = [
 opdir = 'F:\AgodaTest\\'
 #dm = DownloadsProcessor(urls,opdir,'config\config.ini')
 dm = DownloadsProcessor(urls,opdir)
-dm2 = DownloadsProcessor(urls,opdir,'C:\\Users\\Chetana\Dropbox\JHUNTING\Applications\Jan4Afterwards\Agoda\pydownloader\\resourcedownloader\\config\\config.ini')
-
 dm.download_resources()
+
+#dm2 = DownloadsProcessor(urls,opdir,'C:\\Users\\Chetana\Dropbox\JHUNTING\Applications\Jan4Afterwards\Agoda\pydownloader\\resourcedownloader\\config\\config.ini')
+
 #dm2.download_resources()
 #print("Debug")
 
