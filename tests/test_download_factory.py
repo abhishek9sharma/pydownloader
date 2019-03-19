@@ -20,5 +20,3 @@ class TestDownloadFactory(object):
     def test_unsupported_protocol(self):
         with pytest.raises(NotImplementedError):
             DownloadProtocolFactory.get_protocol('invalid://dummyhost/dir/file.txt')
-
-

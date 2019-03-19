@@ -13,14 +13,20 @@ class Resource:
         self.resourceidx = idx
         self.resourceurl = resourceurl
         self.config_path = self.set_config_path(config_path)
-        self.protocolclass = DownloadProtocolFactory.get_protocol(self.resourceurl, self.config_path)
+        self.exceptions_if_failed = []
+        try:
+            self.protocolclass = DownloadProtocolFactory.get_protocol(self.resourceurl, self.config_path)
+        except Exception as e:
+            self.protocolclass = None
+            self.exceptions_if_failed.append(e)
+
         self.protocolresolved = True if self.protocolclass else False
         self.protocol_downloader = None
         self.status = "Failed : Undefined Protocol" if not(self.protocolresolved) else ""
         self.download_progress = None
         self.downloadfilepath = None
         self.progress_bar = None
-        self.exceptions_if_failed = []
+
    
     def set_status(self, statusvalue):
         self.status = str(statusvalue)

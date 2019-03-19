@@ -1,9 +1,9 @@
 # import  sys
 # print(sys.path)
-from queue import Queue,Empty
-from threading import  Thread, Semaphore
 from resourcedownloader.processor.downloadprocessor import  DownloadProcessor
 from resourcedownloader.processor.resource import Resource
+from queue import Queue,Empty
+from threading import  Thread, Semaphore
 import  os
 import  errno
 import  time
@@ -11,11 +11,11 @@ from tqdm import  tqdm
 from configparser import  ConfigParser
 from pathlib import  Path
 import sys
+import logging
+from  datetime import  datetime
 
-#TODO:     # check SFTP Console Exception
-#TODO:     # Write a Log Somewhere
-#TODO:     # errors for 0 inputs/Packaging
-#TODO:     #Detailed Logging at each faiure
+
+
 #TODO:     # Main Progress Bar
 #TODO :     #remove commented code
 #TODO :    #Temp Dir and Cleanup a possible way
@@ -24,19 +24,21 @@ import sys
 class DownloadsProcessor:
 
     def __init__(self, resourceurlslist, path_download_dir, config_path = None):
+
+        if len(resourceurlslist) == 0 or resourceurlslist is None:
+            raise ValueError('No urls are present in the file specified')
+
+        if path_download_dir == '' or path_download_dir is None:
+            raise ValueError(" Download directory is not specified or is invalid. Please check ")
+
         self.resourceurls = resourceurlslist
         self.path_download_dir = os.path.join(path_download_dir)
         self.config_path = self.set_config_path(config_path)
         self.configparser = None
+        self.logger = self.set_logger()
         self.progress_info_mode = 1
 
-        if len(self.resourceurls)==0:
-            print( " No urls specified. Please provide resource links need to be downloade")
-            return
 
-        if self.path_download_dir=='' or self.path_download_dir is None:
-            print( " Download directory is not specified or is invalid. Please check ")
-            return
 
         self.jobqueue = Queue()
         self.failedqueue = Queue()
@@ -53,13 +55,17 @@ class DownloadsProcessor:
                 resourceobj.update_status(statusvalue)    
             else:
                 statusvalue = "Protocol could not be resolved no further processing"
-                #self.failedqueue.put((idx, statusvalue))
-                #self.results['Unresolved'].append(idx)
                 resourceobj.update_status(statusvalue)
+                loginfo = statusvalue + " is the  status for url:{0}\n".format(resourceobj.resourceurl)
+                excpinfo = " ".join(['\t\t\t\t\t     Failed with exception' + str(e) + '\n' for e in
+                                     resourceobj.exceptions_if_failed])
+                self.logger.info(loginfo + excpinfo)
+
                            
             self.resources[idx] = resourceobj      
        
         self.threadsize = 2
+        self.logger.info("resource objects initiated")
 
     def set_config_path(self, config_path):
         try:
@@ -93,6 +99,26 @@ class DownloadsProcessor:
         except:
             self.threadsize = 2 # set to default so as to keep the process runnning
 
+    def get_currtime_str(self):
+        timestampformat = '%Y%m%d__%H%M%S'
+        currtime_str = str(datetime.now().strftime(timestampformat))
+        return  currtime_str
+
+    def set_logger(self):
+        uniqfilename = os.path.join(str(Path(__file__).parents[1]),'Logs', self.get_currtime_str()+ '_main_joblog.log')
+        #uniqfilename = str(self.get_currtime_str()+ '_'+ self.threadtempid +'_' + 'joblog.log')
+
+        logger = logging.getLogger(str(uniqfilename))
+        logger.setLevel(logging.INFO)
+        logfilepath = uniqfilename
+
+        handler = logging.FileHandler(logfilepath)
+        logformat = logging.Formatter('%(asctime)s:%(message)s')
+        handler.setFormatter(logformat)
+        logger.propagate = False
+        logger.addHandler(handler)
+
+        return  logger
 
 
     def check_failed_downloads_deletion(self):
@@ -112,7 +138,6 @@ class DownloadsProcessor:
 
         except:
             pass
-
 
     def delete_failed_download(self, resourceobj):
         try:
@@ -174,8 +199,8 @@ class DownloadsProcessor:
                     sys.stdout.flush()
                     #print(
                     #time.sleep(0.5)
-                    #self.clear_screen()                    
-                
+                    #self.clear_screen()
+
                 else:
                     self.plot_progress_individual()
 
@@ -188,22 +213,22 @@ class DownloadsProcessor:
 
                 if self.jobqueue.unfinished_tasks == 0:
                     if self.progress_info_mode == 1:
-                        pass
-                        print("Total Jobs: {0}  Jobs Left : {1}".format (str(len(self.resources)), str(self.jobqueue.unfinished_tasks)))
+                        opstring = "Total Jobs: {0}  Jobs Finished : {1} Jobs Left : {2}".format(total, finished, left)
+                        print(opstring)
                     else:
                         self.plot_progress_individual()
-                        time.sleep(5)
+                        #time.sleep(5)
                         self.failedqueue.join()
                     break              
-                self.check_failed_downloads_deletion() 
-               
+                self.check_failed_downloads_deletion()
+                self.logger.info(" Completed a round of failed downloads removal inside monitor")
                                             
             self.check_failed_downloads_deletion()
+            self.logger.info(" Completed final  round of failed downloads removal inside monitor")
         except:
             self.check_failed_downloads_deletion()
+            self.logger.info(" Completed  round of failed downloads removal inside monitor exception")
             raise
-
-
 
     # def basic_progress_bar(self,count, total, status=''):
     #     bar_len = 60
@@ -217,13 +242,17 @@ class DownloadsProcessor:
 
     def download_resources(self):
         try:
+            self.logger.info(" Download Modules Initiated ")
             self.load_config()
             if self.configparser:
                 self.set_no_of_threads()
 
+
+
             #Start Monitor
             progress_monitor = Thread(target=self.monitor_progress)
             progress_monitor.start()
+            self.logger.info(" Monitoring Thread Initiated ")
 
             # Start Downloads
             if self.threadsize > len(self.resourceurls):
@@ -236,16 +265,29 @@ class DownloadsProcessor:
                 jobprocessor = DownloadProcessor(threadidx, self.jobqueue, self.failedqueue, self.resources, self.path_download_dir, self.config_path)
                 jobprocessor.start()
 
+            self.logger.info(" Job Proceesing Threads Initiated ")
+
             self.jobqueue.join()
+            self.logger.info(" Trying to Closing  Job Proceesing Threads ")
+
+
             self.failedqueue.join()
+            self.logger.info(" Completed round of failed downloads removal after job thread closing")
+
             progress_monitor.join()
+            self.logger.info(" Trying to Closing  Monitor Threads ")
             #time.sleep(20)
             #print(' Finished Processing Jobs')
+        except:
+            self.check_failed_downloads_deletion()
+            self.logger.info(" Completed round failed downloads removal inside download module exception")
         finally:
             # self.jobqueue.join()
             # progress_monitor.join()
-            self.check_failed_downloads_deletion()           
-            time.sleep(10)
+            self.check_failed_downloads_deletion()
+            self.logger.info(" Completed last round of failed downloads removal ")
+            #time.sleep(10)
             print(" Completed current iteration for Processing (Downloading) Resources")
+            self.logger.info(" Completed current iteration for Processing (Downloading) Resources")
 
 

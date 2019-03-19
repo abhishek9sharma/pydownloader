@@ -1,16 +1,17 @@
 from resourcedownloader.downloadservice.resource_downloader import BaseDownloader
 import pysftp
 import  os
-
+import  logging
+logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 #TODO:     # Check for size compute failure in connect method line 20
-#TODO: handle timeout exception
 #TODO : Remove commented Code
 
 
 class SFTPDownloader(BaseDownloader):
     
     def __init__(self, resourceurl, path_download_dir, config_path = None):
+
         super().__init__(resourceurl, path_download_dir,  config_path)
         #cnopts = pysftp.CnOpts()
         #cnopts.hostkeys = None

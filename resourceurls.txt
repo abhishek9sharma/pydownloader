@@ -1,3 +1,4 @@
-ftp://speedtest:speedtest@ftp.otenet.gr/test1Mb.db
-http://speedtest.ftp.otenet.gr/files/test1Mb.db
+http://speedtest.tele2.net/1MB.zip
+ftp://speedtest.tele2.net/10MB.zip
 sftp://demo-user:demo-user@demo.wftpserver.com:2222/download/manual_en.pdf
+https://www.python.org/static/community_logos/python-logo-master-v3-TM.png
