@@ -3,7 +3,7 @@ import  os, errno
 from  urllib.parse import urlparse
 from datetime import  datetime
 from configparser import  ConfigParser
-from path import Path
+from pathlib import Path
 
 #TODO : Remove commented Code
 

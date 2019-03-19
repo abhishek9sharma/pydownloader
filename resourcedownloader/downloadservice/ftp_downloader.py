@@ -18,12 +18,12 @@ class FTPDownloader(BaseDownloader):
         try:
             if self.configparser:
                 ports = self.configparser['ports']
-                port = ports.get(self.protocol, 0)
+                port = ports.get(self.protocol, 21)
                 self.port = int(port)
             else:
-                self.port = 0
+                self.port = 21
         except:
-            self.port = 0 # default set to continue process
+            self.port = 21 # default set to continue process
 
     def connect(self):
 

@@ -10,7 +10,7 @@ config['protocol_selector'] ={
 
 config['ports']={
 'http' :'0',
-'ftp':'0',
+'ftp':'21',
 'sftp':'22',
 }
 
