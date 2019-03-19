@@ -4,4 +4,4 @@ requests==2.18.4
 forked_path==0.2.3
 tqdm==4.31.1
 colorama==0.4.1
-
+pytest==3.2.1
