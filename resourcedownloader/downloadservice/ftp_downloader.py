@@ -3,18 +3,24 @@ import  os
 from ftplib import  FTP
 from configparser import  ConfigParser
 
-#TODO:     # Check for size compute failure in connect method line 20
-#TODO : Remove commented Code
+import  logging
+logging.getLogger("ftplib").setLevel(logging.WARNING)
 
 class FTPDownloader(BaseDownloader):
     
     def __init__(self, resourceurl, path_download_dir,  config_path = None):
+        
+        """ Returns downloader object for FTP resoucrce """
+
         super().__init__(resourceurl, path_download_dir,  config_path)
         self.ftpconnector = FTP()
         self.remotepath = None
 
 
     def set_port_from_config(self):
+
+        """ Sets the default port to be used for downloading FTP file """
+        
         try:
             if self.configparser:
                 ports = self.configparser['ports']
@@ -23,12 +29,15 @@ class FTPDownloader(BaseDownloader):
             else:
                 self.port = 21
         except:
-            self.port = 21 # default set to continue process
+            self.port = 21 
+            # default set to continue process
 
     def connect(self):
-
+        
+        """ This method extracts connection information from the url and tries to create a FTP Connection """
+        
         try:
-            #Establish Connection
+            # Establish Connection
             host = self.parsed_url.hostname
             port = self.parsed_url.port
 
@@ -43,23 +52,25 @@ class FTPDownloader(BaseDownloader):
             self.ftpconnector.login( user = username, passwd= password)
             self.connectionactive = True
             
-            #Compute size of file
+
+            # Compute size of file
             self.remotepath = self.org_file_name
             if self.remotedir:
                 self.ftpconnector.cwd(self.remotedir)
                 self.remotepath = os.path.join(self.remotedir , self.remotepath)
-            #if not(self.remotepath):
-            #    self.remotepath = self.org_file_name
             self.size_of_file_to_download = self.ftpconnector.size(self.remotepath)
-            #raise exception if file size cannot be determined
+
+            # raise exception if file size cannot be determined as unreliable download
             if self.size_of_file_to_download == 0:
-                #Not sure if this is actually required except for tracking progress
-                raise ValueError( " Not Able to determine length of the content to be downloaded for url {0}", self.resourceurl)
+                raise ValueError( " Aborting, as not able to determine length of the content to be downloaded for url {0}", self.resourceurl)
 
         except:
             raise
 
     def disconnect(self):
+
+        """ This method tries to stop all connections which were created while trying to download an FFTP resource """
+
         if self.ftpconnector.sock:
             try:
                 self.ftpconnector.quit()
@@ -69,6 +80,9 @@ class FTPDownloader(BaseDownloader):
                 self.connectionactive = False
     
     def abortdownload(self):
+
+        """ This method tries to stop any active FTP connections and delete the downloaded FTP resource """
+
         try:
             self.disconnect()
         except:
@@ -77,6 +91,12 @@ class FTPDownloader(BaseDownloader):
             self.delete_file()
 
     def download_resource(self, resourceidx):
+
+        """ 
+            This method tries to download a FTP resource attached with the class.
+            In case of partial download tries to delete the file downloaded 
+        """
+
         try:
             super().download_resource(resourceidx)
             self.connect()
