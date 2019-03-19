@@ -52,7 +52,7 @@ A package (set of scripts) to download files using various network protocols.
         
         -- pydownloader/resourcedownloader/Logs 
 
-8. In order to execute the testcases run the following command from command prompt
+8. In order to execute the testcases run the following command from command prompt. Before this please make sure to *activate* the *virtual environments* as         shown in *Step 3* or *Step 4*
     
         -- Windows  : pytest
         -- Linux    : pytest

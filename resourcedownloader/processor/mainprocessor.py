@@ -15,7 +15,7 @@ import sys
 import logging
 from datetime import datetime
 from resourcedownloader.utils.utilfunctions import *
-
+from random import *
 
 
 class DownloadsProcessor:
@@ -179,7 +179,7 @@ class DownloadsProcessor:
             elif state in ['Queued', 'Downloading']:
                 downloading += 1
         #opstring = "Total Jobs: {0} Running : {1} Downloaded : {2} Failed : {3}".format(total, downloading, downloaded, failed)
-        opstring = "Total Jobs:"+ str(total) +" Running:"+ str(downloading) +" Downloaded:" + str(downloaded)+ " Failed :" + str(failed)
+        opstring = "\t Total Jobs:" + str(total) + " Running:" + str(downloading) + " Downloaded:" + str(downloaded) + " Failed :" + str(failed)
         if final:
             print(opstring)
             time.sleep(1)
@@ -198,6 +198,7 @@ class DownloadsProcessor:
                 if self.progress_info_mode == 1:
                     self.get_progress_counts()
                 else:
+                    print(' ')
                     self.plot_progress_individual()
                     # Track Main Processor
                     #self.plot_progress_total()
