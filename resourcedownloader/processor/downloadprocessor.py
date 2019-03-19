@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import logging
 from datetime import datetime
+import time
 from resourcedownloader.utils.utilfunctions import *
 
 
@@ -52,6 +53,7 @@ class DownloadProcessor(Thread):
                 statusval = 'Calling Download Method of Downloader :'
 
                 curr_resource.update_status(statusval)
+                time.sleep(0.5)
                 curr_resource.protocol_downloader.download_resource(file_idx)
                 curr_resource.set_downloadfilepath(curr_resource.protocol_downloader.get_download_path())
                 statusval = 'Download Completed :'

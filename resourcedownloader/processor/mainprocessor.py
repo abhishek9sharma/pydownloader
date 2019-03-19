@@ -17,8 +17,6 @@ from datetime import datetime
 from resourcedownloader.utils.utilfunctions import *
 
 
-# TODO:     # Main Progress Bar or Alternative Code Up
-
 
 class DownloadsProcessor:
 
@@ -35,9 +33,10 @@ class DownloadsProcessor:
         self.resourceurls = resourceurlslist
         self.path_download_dir = os.path.join(path_download_dir)
         self.config_path = set_config_path(config_path)
+
         self.configparser = None
         self.logger = set_logger('_main_joblog.log')
-        self.progress_info_mode = 2
+        self.progress_info_mode = 1
 
         self.jobqueue = Queue()
         self.failedqueue = Queue()
@@ -158,45 +157,63 @@ class DownloadsProcessor:
         for k, resourceobj in self.resources.items():
             resourceobj.plot_progress(lastcall)
 
+    def get_progress_counts(self, final = False):
+
+        """ Prints job counts based on their current state """
+
+        failed = 0
+        downloaded = 0
+        downloading = 0
+        total = len(self.resources)
+        left = self.jobqueue.unfinished_tasks
+        
+        for k, resourceobj in self.resources.items():
+            state = resourceobj.get_current_state()
+            if state in ['Download was Successful']:
+                 downloaded+=1
+            elif state in ['Download Failed']:
+                #print(resourceobj.res)
+                failed += 1
+            elif state in ['Queued', 'Downloading']:
+                downloading += 1
+        #opstring = "Total Jobs: {0} Running : {1} Downloaded : {2} Failed : {3}".format(total, downloading, downloaded, failed)
+        opstring = "Total Jobs:"+ str(total) +" Running:"+ str(downloading) +" Downloaded:" + str(downloaded)+ " Failed :" + str(failed)
+        if final:
+            print(opstring)
+            time.sleep(1)
+        else:
+            sys.stdout.write(opstring + '\r')
+            sys.stdout.flush() 
+     
+
     def monitor_progress(self):
 
         """Monitors the progress of Resources waiting download in queue and also clears downloads in failed queue"""
 
         try:
 
-            while True:
+            while True:                
                 if self.progress_info_mode == 1:
-
-                    # This needs to be finalized    
-                    total = len(self.resources)
-                    left = self.jobqueue.unfinished_tasks
-                    finished = total - left
-                    opstring = "Total Jobs: {0}  Jobs Finished : {1} Jobs Left : {2}".format(total, finished, left)
-                    sys.stdout.write(opstring + '\r')
-                    sys.stdout.flush()
-
+                    self.get_progress_counts()
                 else:
                     self.plot_progress_individual()
                     # Track Main Processor
                     #self.plot_progress_total()
                     # time.sleep(1)
-                time.sleep(1)
+                     #time.sleep(1)
                 
                 if self.jobqueue.unfinished_tasks == 0:
+                    #All jobs should be running by now
                     if self.progress_info_mode == 1:
-                        opstring = "Total Jobs: {0}  Jobs Finished : {1} Jobs Left : {2}".format(total, finished, left)
-                        print(opstring)
+                        self.get_progress_counts(True)  
                     else:
                         self.plot_progress_individual(True)
                         #self.plot_progress_total()
-                        #self.mainprocessprogress.close()
-                        time.sleep(2)
-                        
+                        #time.sleep(2)                        
                     break
+
                 self.check_failed_downloads_deletion()
-                # self.logger.info(" Completed a round of failed downloads removal inside monitor")
-            sys.stdout.flush()
-            self.check_failed_downloads_deletion()
+            self.check_failed_downloads_deletion()            
             self.logger.info(" Completed final  round of failed downloads removal inside monitor")
         except:
             self.check_failed_downloads_deletion()
@@ -233,23 +250,22 @@ class DownloadsProcessor:
 
             self.jobqueue.join()
             self.logger.info(" Trying to Closing  Job Proceesing Threads ")
-
             self.failedqueue.join()
             self.logger.info(" Completed round of failed downloads removal after job thread closing")
 
             progress_monitor.join()
             self.logger.info(" Trying to Closing  Monitor Threads ")
-            # time.sleep(20)
-            #sys.stdout.flush()
-            tqdm.write (' Finished Processing Jobs ')
+
+            #tqdm.write (' Finished Processing Jobs Please check logs folder for detailed info')
+            for ridx, resourceobj in self.resources.items():
+                    print("\t\tFor resource {0} download was {1}".format(resourceobj.resourceurl, resourceobj.get_current_state()))
+                    time.sleep(0.1)            
+            print(' Finished Processing Jobs \n Please check logs folder for detailed info')
+
         except:
             self.check_failed_downloads_deletion()
             self.logger.info(" Completed round failed downloads removal inside download module exception")
         finally:
-        #     # self.jobqueue.join()
-        #     # progress_monitor.join()
               self.check_failed_downloads_deletion()
               self.logger.info(" Completed last round of failed downloads removal ")
-        #     # time.sleep(10)
-        #     print(" Completed current iteration for Processing (Downloading) Resources")
-        #     self.logger.info(" Completed current iteration for Processing (Downloading) Resources")
+             

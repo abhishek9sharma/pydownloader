@@ -57,7 +57,31 @@ class Resource:
 
         self.downloadfilepath = path
 
+    def get_progress_simple(self):
+        
+        """ Returns simple progress of current resource using tqdm library """
+        try:
+            if self.protocolresolved and self.protocol_downloader and self.protocol_downloader.downloaded_file_name:
+                description, downloaded, totalsize, curr_percentage_progress = self.protocol_downloader.get_download_progress()
+                return "{0} percent of resource {1} has been downloaded at {1}".format(curr_percentage_progress, self.resourceurl, description)
+            else:
+                return "No information about resource  {0}".format(self.resourceurl)
+        except:
+            return "No information about resource  {0}".format(self.resourceurl)
+
+    def get_current_state(self):        
+        status = self.get_status()
+        if 'Download Completed' in status:
+            return 'Download was Successful'
+        elif 'Failed' in status:
+            return 'Download Failed'
+        elif status=='Resolved Protocol Ready for Download':
+            return 'Queued'
+        else:
+            return 'Downloading'
+
     def plot_progress(self, lastcall = False):
+        
         """plots progress of current resource using tqdm library """
 
         try:
