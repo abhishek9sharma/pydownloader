@@ -49,10 +49,12 @@ class DownloadsProcessor:
                 statusvalue = "Resolved Protocol Ready for Download"
                 self.jobqueue.put(idx)
                 resourceobj.update_status(statusvalue)
+                self.logger.info(statusvalue + " is the latest status for url:{0}\n".format(resourceobj.resourceurl))
+
             else:
                 statusvalue = "Protocol could not be resolved no further processing"
                 resourceobj.update_status(statusvalue)
-                loginfo = statusvalue + " is the  status for url:{0}\n".format(resourceobj.resourceurl)
+                loginfo = statusvalue + " is the  latest status for url:{0}\n".format(resourceobj.resourceurl)
                 excpinfo = " ".join(['\t\t\t\t\t     Failed with exception' + str(e) + '\n' for e in
                                      resourceobj.exceptions_if_failed])
                 self.logger.info(loginfo + excpinfo)
@@ -249,16 +251,16 @@ class DownloadsProcessor:
             self.logger.info(" Job Proceesing Threads Initiated ")
 
             self.jobqueue.join()
-            self.logger.info(" Trying to Closing  Job Proceesing Threads ")
+            self.logger.info(" Trying to Close  Job Proceesing Threads ")
             self.failedqueue.join()
             self.logger.info(" Completed round of failed downloads removal after job thread closing")
 
             progress_monitor.join()
-            self.logger.info(" Trying to Closing  Monitor Threads ")
+            self.logger.info(" Trying to Close  Monitor Threads ")
 
             #tqdm.write (' Finished Processing Jobs Please check logs folder for detailed info')
             for ridx, resourceobj in self.resources.items():
-                    print("\t\tFor resource {0} download was {1}".format(resourceobj.resourceurl, resourceobj.get_current_state()))
+                    print("\t\tFor resource {0} status was {1}".format(resourceobj.resourceurl, resourceobj.get_current_state()))
                     time.sleep(0.1)            
             print(' Finished Processing Jobs \n Please check logs folder for detailed info')
 

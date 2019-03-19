@@ -41,6 +41,7 @@ class DownloadProcessor(Thread):
                 curr_resource = self.resources[resourceidx]
                 statusval = 'Resource Index Extracted in Download Thread :'
                 curr_resource.update_status(statusval)
+                self.logger.info(statusval + " is the latest status for url:{0}\n".format(curr_resource.resourceurl))
 
                 protocoldownloaderclass = curr_resource.protocolclass
                 curr_resource.protocol_downloader = protocoldownloaderclass(curr_resource.resourceurl,
@@ -48,13 +49,15 @@ class DownloadProcessor(Thread):
 
                 statusval = 'Downloader Object Attached in Thread :'
                 curr_resource.update_status(statusval)
+                self.logger.info(statusval + " is the latest status for url:{0}\n".format(curr_resource.resourceurl))
 
                 file_idx = self.threadtempid + '_' + str(resourceidx)
                 statusval = 'Calling Download Method of Downloader :'
-
                 curr_resource.update_status(statusval)
+                self.logger.info(statusval + " is the latest status for url:{0}\n".format(curr_resource.resourceurl))
                 time.sleep(0.5)
                 curr_resource.protocol_downloader.download_resource(file_idx)
+
                 curr_resource.set_downloadfilepath(curr_resource.protocol_downloader.get_download_path())
                 statusval = 'Download Completed :'
 
@@ -68,7 +71,7 @@ class DownloadProcessor(Thread):
                 curr_resource.update_status(statusval)
                 self.failedqueue.put((resourceidx, statusval))
                 curr_resource.exceptions_if_failed.append(e)
-                loginfo = statusval + " is the  status for url:{0}\n".format(curr_resource.resourceurl)
+                loginfo = statusval + " is the latest status for url:{0}\n".format(curr_resource.resourceurl)
                 excpinfo = " ".join(['\t\t\t\t\t     Failed with exception' + str(e) + '\n' for e in
                                      curr_resource.exceptions_if_failed])
                 self.logger.info(loginfo + excpinfo)
