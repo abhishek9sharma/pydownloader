@@ -4,6 +4,7 @@ from resourcedownloader.processor.downloadprocessor import DownloadProcessor
 from resourcedownloader.processor.resource import Resource
 from queue import Queue, Empty
 from threading import Thread, Semaphore
+import threading
 import os
 import errno
 import time
@@ -42,7 +43,7 @@ class DownloadsProcessor:
         self.failedqueue = Queue()
         self.resources = {}
         self.mainprocessprogress = None
-
+      
         for idx, resourceurl in enumerate(self.resourceurls):
             resourceobj = Resource(idx, resourceurl, config_path)
             if resourceobj.protocolresolved:
@@ -142,24 +143,20 @@ class DownloadsProcessor:
 
         if self.mainprocessprogress is None:
             desc = " Jobs Completed "
-            self.mainprocessprogress = tqdm(desc=desc, total=len(self.resources), disable=False)
+            self.mainprocessprogress = tqdm(desc=desc, total=len(self.resources), disable=False, file=sys.stdout)
 
         if self.mainprocessprogress.n == len(self.resources):
-            pass
+             pass
         else:
             progress = len(self.resources) - self.jobqueue.unfinished_tasks - self.mainprocessprogress.n
             self.mainprocessprogress.update(progress)
-
-    def plot_progress_individual(self):
+        
+    def plot_progress_individual(self, lastcall = False):
 
         """Plots the progress of individual jobs processed in tqdm format """
 
-        lock = Semaphore(value=1)
-        lock.acquire()
         for k, resourceobj in self.resources.items():
-            resourceobj.plot_progress()
-            # time.sleep(0.1)
-        lock.release()
+            resourceobj.plot_progress(lastcall)
 
     def monitor_progress(self):
 
@@ -180,26 +177,25 @@ class DownloadsProcessor:
 
                 else:
                     self.plot_progress_individual()
-
                     # Track Main Processor
-                    # lock = Semaphore(value=1)
-                    # lock.acquire()
-                    # self.plot_progress_total()
+                    #self.plot_progress_total()
                     # time.sleep(1)
-                    # lock.release()
-
+                time.sleep(1)
+                
                 if self.jobqueue.unfinished_tasks == 0:
                     if self.progress_info_mode == 1:
                         opstring = "Total Jobs: {0}  Jobs Finished : {1} Jobs Left : {2}".format(total, finished, left)
                         print(opstring)
                     else:
-                        self.plot_progress_individual()
-                        # time.sleep(5)
-                        self.failedqueue.join()
+                        self.plot_progress_individual(True)
+                        #self.plot_progress_total()
+                        #self.mainprocessprogress.close()
+                        time.sleep(2)
+                        
                     break
                 self.check_failed_downloads_deletion()
                 # self.logger.info(" Completed a round of failed downloads removal inside monitor")
-
+            sys.stdout.flush()
             self.check_failed_downloads_deletion()
             self.logger.info(" Completed final  round of failed downloads removal inside monitor")
         except:
@@ -244,15 +240,16 @@ class DownloadsProcessor:
             progress_monitor.join()
             self.logger.info(" Trying to Closing  Monitor Threads ")
             # time.sleep(20)
-            # print(' Finished Processing Jobs')
+            #sys.stdout.flush()
+            tqdm.write (' Finished Processing Jobs ')
         except:
             self.check_failed_downloads_deletion()
             self.logger.info(" Completed round failed downloads removal inside download module exception")
         finally:
-            # self.jobqueue.join()
-            # progress_monitor.join()
-            self.check_failed_downloads_deletion()
-            self.logger.info(" Completed last round of failed downloads removal ")
-            # time.sleep(10)
-            print(" Completed current iteration for Processing (Downloading) Resources")
-            self.logger.info(" Completed current iteration for Processing (Downloading) Resources")
+        #     # self.jobqueue.join()
+        #     # progress_monitor.join()
+              self.check_failed_downloads_deletion()
+              self.logger.info(" Completed last round of failed downloads removal ")
+        #     # time.sleep(10)
+        #     print(" Completed current iteration for Processing (Downloading) Resources")
+        #     self.logger.info(" Completed current iteration for Processing (Downloading) Resources")

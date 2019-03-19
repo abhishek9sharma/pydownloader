@@ -2,7 +2,9 @@ from resourcedownloader.downloadservice.download_factory import DownloadProtocol
 from tqdm import tqdm
 import os
 from pathlib import Path
+import sys
 from resourcedownloader.utils.utilfunctions import *
+from datetime import datetime
 
 
 class Resource:
@@ -55,23 +57,30 @@ class Resource:
 
         self.downloadfilepath = path
 
-    def plot_progress(self):
+    def plot_progress(self, lastcall = False):
         """plots progress of current resource using tqdm library """
 
         try:
+            #if lastcall:
+            #    if self.progress_bar:
+            #        self.progress_bar.close()
+
             if self.protocolresolved and self.protocol_downloader and self.protocol_downloader.downloaded_file_name:
                 description, downloaded, totalsize, curr_percentage_progress = self.protocol_downloader.get_download_progress()
                 if totalsize == 0:
                     description += 'Cannot track progress as size of file not determined'
 
                 if self.download_progress is None:
-                    self.download_progress = tqdm(total=100, desc=description, disable=False)
+                    self.download_progress = tqdm(total=100, desc=description, disable=False, file=sys.stdout)
 
                 if self.download_progress.n == 100:
+                    #self.progress_bar.close()
                     pass
                 else:
                     currprogress = curr_percentage_progress - self.download_progress.n
                     self.download_progress.update(currprogress)
+                    #time.sleep(1)
+                    
             else:
                 return
         except:
