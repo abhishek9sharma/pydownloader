@@ -10,14 +10,14 @@ import  time
 from tqdm import  tqdm
 from configparser import  ConfigParser
 from pathlib import  Path
+import sys
 
-#TODO:     # Progress Buggy on Inside Virtual Env
 #TODO:     # check SFTP Console Exception
 #TODO:     # Write a Log Somewhere
 #TODO:     # errors for 0 inputs/Packaging
 #TODO:     #Detailed Logging at each faiure
+#TODO:     # Main Progress Bar
 #TODO :     #remove commented code
-
 #TODO :    #Temp Dir and Cleanup a possible way
 
 
@@ -28,6 +28,7 @@ class DownloadsProcessor:
         self.path_download_dir = os.path.join(path_download_dir)
         self.config_path = self.set_config_path(config_path)
         self.configparser = None
+        self.progress_info_mode = 2
         
 
         if len(self.resourceurls)==0:
@@ -161,20 +162,39 @@ class DownloadsProcessor:
     def monitor_progress(self):
         """Monitors the progress of Resources waiting download in queue and also clears downloads in failed queue"""
         try:
-            lock = Semaphore(value=1)
-            while True:
-                
-                self.plot_progress_individual()
 
-                #Track Main Processor                    
-                # lock.acquire()                
-                # self.plot_progress_total()
-                # time.sleep(1)  
-                # lock.release()
+            while True:
+                if self.progress_info_mode ==1:
+                    total = len(self.resources)
+                    left = self.jobqueue.unfinished_tasks
+                    finished = total - left
+                    #self.basic_progress_bar(finished,total, status='Progress')
+                    #time.sleep(0.5)  # emulating long-playing job
+                    opstring = "Total Jobs: {0}  Jobs Left : {1}".format(total, left)
+                    sys.stdout.write(opstring + '\r')
+                    sys.stdout.flush()
+                    #print(
+                    #time.sleep(0.5)
+                    #self.clear_screen()                    
+                
+                else:
+                    self.plot_progress_individual()
+
+                    #Track Main Processor
+                    #lock = Semaphore(value=1)
+                    # lock.acquire()
+                    # self.plot_progress_total()
+                    # time.sleep(1)
+                    # lock.release()
 
                 if self.jobqueue.unfinished_tasks == 0:
-                    #self.plot_progress_individual()
-                    time.sleep(5)
+                    if self.progress_info_mode == 1:
+                        pass
+                        print("Total Jobs: {0}  Jobs Left : {1}".format (str(len(self.resources)), str(self.jobqueue.unfinished_tasks)))
+                    else:
+                        self.plot_progress_individual()
+                        time.sleep(5)
+                        self.failedqueue.join()
                     break              
                 self.check_failed_downloads_deletion() 
                
@@ -184,6 +204,21 @@ class DownloadsProcessor:
             self.check_failed_downloads_deletion()
             raise
 
+    def clear_screen(self):
+        if os.name=='nt':
+            os.system('cls')
+        else:
+            os.system('clear')
+
+    def basic_progress_bar(self,count, total, status=''):
+        bar_len = 60
+        filled_len = int(round(bar_len * count / float(total)))
+
+        percents = round(100.0 * count / float(total), 1)
+        bar = '=' * filled_len + '-' * (bar_len - filled_len)
+
+        sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
+        sys.stdout.flush() 
 
     def download_resources(self):
         try:
