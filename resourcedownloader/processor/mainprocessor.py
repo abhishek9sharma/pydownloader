@@ -20,7 +20,7 @@ from random import *
 
 class DownloadsProcessor:
 
-    def __init__(self, resourceurlslist, path_download_dir, config_path=None):
+    def __init__(self, resourceurlslist, path_download_dir, config_path=None, displaymode = 1):
 
         """ Constructor for creating a list of resources which need to be downloaded """
 
@@ -36,7 +36,7 @@ class DownloadsProcessor:
 
         self.configparser = None
         self.logger = set_logger('_main_joblog.log')
-        self.progress_info_mode = 1
+        self.progress_info_mode = displaymode
 
         self.jobqueue = Queue()
         self.failedqueue = Queue()
@@ -193,12 +193,12 @@ class DownloadsProcessor:
         """Monitors the progress of Resources waiting download in queue and also clears downloads in failed queue"""
 
         try:
-
+            print()
             while True:                
                 if self.progress_info_mode == 1:
                     self.get_progress_counts()
                 else:
-                    print(' ')
+                    #print(' ')
                     self.plot_progress_individual()
                     # Track Main Processor
                     #self.plot_progress_total()
