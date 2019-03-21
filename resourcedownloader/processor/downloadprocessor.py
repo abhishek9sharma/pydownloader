@@ -59,6 +59,12 @@ class DownloadProcessor(Thread):
                 curr_resource.protocol_downloader.download_resource(file_idx)
 
                 curr_resource.set_downloadfilepath(curr_resource.protocol_downloader.get_download_path())
+                
+                size_expected = curr_resource.protocol_downloader.size_of_file_to_download
+                size_downloaded = curr_resource.protocol_downloader.size_of_file_downloaded
+                if size_expected!=size_downloaded:
+                    raise ValueError('Download has not actually completed false postive')
+
                 statusval = 'Download Completed :'
 
                 curr_resource.update_status(statusval)
